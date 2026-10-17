@@ -1,0 +1,265 @@
+{
+  "book_id": "carnegie",
+  "title": "Autobiography of Andrew Carnegie",
+  "subtitle": "Three excerpts from Chapters I, XIII and XVI · Andrew Carnegie (1920)",
+  "meta_tag": "READING EXCERPT COMPARISON · PROJECT GUTENBERG #17976",
+  "lang": "en",
+  "label_orig": "Original",
+  "label_illus": "Illustrated",
+  "sections": [
+    {
+      "label": "Chapter I · Parents and Childhood",
+      "pids": [
+        "p00195"
+      ]
+    },
+    {
+      "label": "Chapter XIII · The Age of Steel",
+      "pids": [
+        "p00789"
+      ]
+    },
+    {
+      "label": "Chapter XVI · Mills and the Men",
+      "pids": [
+        "p00934"
+      ]
+    }
+  ],
+  "relative_paths": {
+    "orig_epub": "carnegie/dl/original.epub",
+    "illus_epub": "carnegie/job/carnegie_illustrated.epub",
+    "book_json": "carnegie/job/book.json"
+  },
+  "output": "docs/assets/carnegie-before-after.webp",
+  "layout": {
+    "width": 1500,
+    "font_size": 19,
+    "line_height": 1.55,
+    "paragraph_indent": "0",
+    "paragraph_spacing": "0.8em",
+    "image_max_height": 230,
+    "caption_size": 15,
+    "column_gap": 0
+  },
+  "quality": 88,
+  "source_excerpt": {
+    "book": "Autobiography of Andrew Carnegie",
+    "author": "Andrew Carnegie (1835–1919); editor John C. Van Dyke",
+    "edition": "Project Gutenberg EBook #17976, EPUB without images",
+    "source_url": "https://www.gutenberg.org/ebooks/17976",
+    "source_epub_url": "https://www.gutenberg.org/ebooks/17976.epub.noimages",
+    "source_epub_sha256": "3d64e7e68b78af3c16a94e5e30839c0686513796b998678e2a220e47c47623dd",
+    "excerpts": [
+      {
+        "chapter": "Chapter I — Parents and Childhood",
+        "pids": [
+          "p00195"
+        ],
+        "characters_count": 415
+      },
+      {
+        "chapter": "Chapter XIII — The Age of Steel",
+        "pids": [
+          "p00789"
+        ],
+        "characters_count": 650
+      },
+      {
+        "chapter": "Chapter XVI — Mills and the Men",
+        "pids": [
+          "p00934"
+        ],
+        "characters_count": 786
+      }
+    ],
+    "selection_note": "Three separate, non-adjacent paragraphs; text between them is omitted and marked as omitted in the image. Each paragraph is shown whole.",
+    "rights": "Public domain in the USA per Project Gutenberg catalog page."
+  },
+  "illustrations": [
+    {
+      "entity": "andrew_carnegie",
+      "at": "p00195",
+      "subject": "Andrew Carnegie (1835–1919), the author",
+      "caption": "Andrew Carnegie · the author",
+      "note": "Photo: Frances Benjamin Johnston, 1905 · Library of Congress",
+      "medium": "Photographic print",
+      "source_page": "https://www.loc.gov/pictures/item/2001704108/",
+      "image_url": "https://cdn.loc.gov/service/pnp/cph/3b30000/3b35000/3b35100/3b35116v.jpg",
+      "author": "Frances Benjamin Johnston (1864–1952)",
+      "date": "c1905; LOC title \"Andrew Carnegie, April 1905\"",
+      "credit": "Library of Congress, Prints & Photographs Division, Frances Benjamin Johnston Collection, LC-USZ62-88699",
+      "license": "No known restrictions on reproduction (Library of Congress rights statement)",
+      "license_url": "https://www.loc.gov/pictures/item/2001704108/",
+      "changes": "Downscaled and re-encoded as JPEG by export.py; shown at reduced size in the comparison",
+      "identity_check": "LOC subject heading Carnegie, Andrew, 1835-1919; same face as the 1913 Marceau photograph used by Wikidata Q484265 (P18) and the c. 1878 plate in the 1920 book"
+    },
+    {
+      "entity": "henry_phipps",
+      "at": "p00789",
+      "subject": "Henry Phipps (1839–1930), Carnegie's partner",
+      "caption": "Henry Phipps · Carnegie's partner",
+      "note": "Photo: Bain News Service, undated · Library of Congress",
+      "medium": "Glass negative",
+      "source_page": "https://www.loc.gov/pictures/item/2014686848/",
+      "image_url": "https://cdn.loc.gov/service/pnp/ggbain/06800/06856v.jpg",
+      "author": "Bain News Service (publisher)",
+      "date": "No date recorded on caption card",
+      "credit": "Library of Congress, Prints & Photographs Division, George Grantham Bain Collection, LC-DIG-ggbain-06856",
+      "license": "No known restrictions on publication (Library of Congress rights statement)",
+      "license_url": "https://www.loc.gov/rr/print/res/274_bain.html",
+      "crop": [
+        0.14,
+        0.13,
+        0.76,
+        0.95
+      ],
+      "changes": "Cropped to the sitter (negative border and handwritten label removed), downscaled and re-encoded as JPEG by export.py",
+      "identity_check": "Name written on the negative (Bain data, unverified per LOC); consistent with the 'Henry Phipps' plate in the 1920 book, which shows him younger. Wikidata Q5726992 uses this same LOC file, so it is not an independent confirmation"
+    },
+    {
+      "entity": "henry_clay_frick",
+      "at": "p00934",
+      "subject": "Henry Clay Frick (1849–1919)",
+      "caption": "Henry Clay Frick · Frick Coke Company",
+      "note": "Photo: Bain News Service, c. 1915–1920 · Library of Congress",
+      "medium": "Glass negative",
+      "source_page": "https://www.loc.gov/pictures/item/2014709956/",
+      "image_url": "https://cdn.loc.gov/service/pnp/ggbain/29700/29798v.jpg",
+      "author": "Bain News Service (publisher)",
+      "date": "between ca. 1915 and ca. 1920",
+      "credit": "Library of Congress, Prints & Photographs Division, George Grantham Bain Collection, LC-DIG-ggbain-29798",
+      "license": "No known restrictions on publication (Library of Congress rights statement)",
+      "license_url": "https://www.loc.gov/rr/print/res/274_bain.html",
+      "crop": [
+        0.06,
+        0.08,
+        0.95,
+        0.97
+      ],
+      "changes": "Cropped to remove the negative border, downscaled and re-encoded as JPEG by export.py",
+      "identity_check": "LOC summary: 'industrialist and financier Henry Clay Frick (1849-1919)'; name written on the negative; same face as Wikidata Q93709 P18 (a different Bain negative, ggbain.07131)"
+    }
+  ],
+  "entities": {
+    "book": "Autobiography of Andrew Carnegie",
+    "settings": {
+      "inline": true,
+      "gallery": false,
+      "gallery_title": "People in this chapter",
+      "chapter_re": "^CHAPTER",
+      "sources": [
+        "manifest"
+      ],
+      "scope": [
+        12,
+        42
+      ]
+    },
+    "entities": [
+      {
+        "id": "andrew_carnegie",
+        "name": "Andrew Carnegie",
+        "type": "person",
+        "at": "p00195",
+        "pick": "mf_8cd06c665e0c.jpg",
+        "match": [
+          "I was born in Dunfermline"
+        ],
+        "role": "the author",
+        "caption": "Andrew Carnegie · the author",
+        "note": "Photo: Frances Benjamin Johnston, 1905 · Library of Congress"
+      },
+      {
+        "id": "henry_phipps",
+        "name": "Henry Phipps",
+        "type": "person",
+        "at": "p00789",
+        "pick": "mf_f251eb61b811.jpg",
+        "crop": [
+          0.14,
+          0.13,
+          0.76,
+          0.95
+        ],
+        "match": [
+          "Mr. Phipps"
+        ],
+        "role": "Carnegie's partner",
+        "caption": "Henry Phipps · Carnegie's partner",
+        "note": "Photo: Bain News Service, undated · Library of Congress"
+      },
+      {
+        "id": "henry_clay_frick",
+        "name": "Henry Clay Frick",
+        "type": "person",
+        "at": "p00934",
+        "pick": "mf_7d38f204ad29.jpg",
+        "crop": [
+          0.06,
+          0.08,
+          0.95,
+          0.97
+        ],
+        "match": [
+          "Mr. Frick"
+        ],
+        "role": "Frick Coke Company",
+        "caption": "Henry Clay Frick · Frick Coke Company",
+        "note": "Photo: Bain News Service, c. 1915–1920 · Library of Congress"
+      }
+    ]
+  },
+  "image_manifest": {
+    "version": 1,
+    "candidates": [
+      {
+        "entity": "andrew_carnegie",
+        "image_url": "https://cdn.loc.gov/service/pnp/cph/3b30000/3b35000/3b35100/3b35116v.jpg",
+        "source_page": "https://www.loc.gov/pictures/item/2001704108/",
+        "title": "Andrew Carnegie, April 1905",
+        "author": "Frances Benjamin Johnston (1864–1952), photographer",
+        "date": "c1905 (title: April 1905)",
+        "credit": "Library of Congress, Prints & Photographs Division, Frances Benjamin Johnston Collection, LC-USZ62-88699",
+        "license": "No known restrictions on reproduction (Library of Congress rights statement)",
+        "license_url": "https://www.loc.gov/pictures/item/2001704108/",
+        "query": "Andrew Carnegie LOC photographic print"
+      },
+      {
+        "entity": "henry_phipps",
+        "image_url": "https://cdn.loc.gov/service/pnp/ggbain/06800/06856v.jpg",
+        "source_page": "https://www.loc.gov/pictures/item/2014686848/",
+        "title": "Henry Phipps",
+        "author": "Bain News Service, publisher",
+        "date": "No date recorded on caption card",
+        "credit": "Library of Congress, Prints & Photographs Division, George Grantham Bain Collection, LC-DIG-ggbain-06856",
+        "license": "No known restrictions on publication (Library of Congress rights statement)",
+        "license_url": "https://www.loc.gov/rr/print/res/274_bain.html",
+        "query": "Henry Phipps Bain News Service"
+      },
+      {
+        "entity": "henry_clay_frick",
+        "image_url": "https://cdn.loc.gov/service/pnp/ggbain/29700/29798v.jpg",
+        "source_page": "https://www.loc.gov/pictures/item/2014709956/",
+        "title": "H.C. Frick",
+        "author": "Bain News Service, publisher",
+        "date": "between ca. 1915 and ca. 1920",
+        "credit": "Library of Congress, Prints & Photographs Division, George Grantham Bain Collection, LC-DIG-ggbain-29798",
+        "license": "No known restrictions on publication (Library of Congress rights statement)",
+        "license_url": "https://www.loc.gov/rr/print/res/274_bain.html",
+        "query": "H.C. Frick Bain News Service"
+      }
+    ]
+  },
+  "reproduction": {
+    "steps": "prepare.py original.epub WORKDIR; write entities.json and image_manifest.json from the fields above; find_images.py WORKDIR; export.py WORKDIR --out WORKDIR/carnegie_illustrated.epub; verify.py; render-comparison.py --manifest examples/demos/carnegie.json --work-dir <scratch root>",
+    "picks_note": "pick file names are <source>_<sha256[:12]> of the downloaded bytes; if LOC serves different bytes, set pick to the new file in candidates/<id>/",
+    "verify_result": "OK: 4 inserted blocks; original files byte-identical outside them (3 inline figures + image-credits section)",
+    "candidate_sha256": {
+      "andrew_carnegie": "8cd06c665e0cc28d51ae4ddbe0e7f1ed3668cfd17637e107cfb2c489d1b36728",
+      "henry_phipps": "f251eb61b811fc0542c319ba7c160d32e8f097742c46a8c5f8c79b7ab5455310",
+      "henry_clay_frick": "7d38f204ad29b1c80455c8cc609727f189bc8bd8f505dc21a69c9d6a32ebac20"
+    }
+  },
+  "asset_license_notice": "docs/assets/LICENSE.md"
+}

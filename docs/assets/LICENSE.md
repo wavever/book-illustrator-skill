@@ -1,21 +1,21 @@
-# Demonstration asset licenses and release status
+# Demonstration asset rights and attribution
 
-The repository's MIT license applies to code. It does not grant rights to third-party photographs or book excerpts. Preserve this notice when sharing the comparison assets.
+The MIT license covers the software. The comparison layout and copyrightable arrangement contributed by **wavever, 2026** in `li-hongzhang-before-after.webp` and `carnegie-before-after.webp` are licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Underlying materials retain their own status below; this layout license adds no restrictions to public-domain materials.
 
-## `beagle-before-after.webp`
+## `li-hongzhang-before-after.webp`
 
-- Text: Charles Darwin, *The Voyage of the Beagle*, Chapter XVII; [Project Gutenberg eBook #944](https://www.gutenberg.org/ebooks/944). The catalog identifies the text as public domain in the USA; check the law where you use it. No new restrictions are imposed on public-domain text.
-- Photograph: **Bernard Gagnon**, *Chelonoidis vicina 04.jpg* (2014-12-07), Charles Darwin Research Station, Santa Cruz Island, Galápagos, Ecuador. [Original source](https://commons.wikimedia.org/wiki/File:Chelonoidis_vicina_04.jpg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
-- Changes: photograph resized and re-encoded, then placed with a caption inside a comparison of reading excerpts. The photograph is a modern reference, not a photograph from Darwin's voyage.
-- Original comparison layout and any copyrightable arrangement contributed by wavever, 2026: **CC BY-SA 4.0**. The photograph remains under that license; the public-domain text remains public domain. [License legal code](https://creativecommons.org/licenses/by-sa/4.0/legalcode.en).
+- Text: **梁启超 (Liang Qichao, 1873–1929)**, *李鴻章傳*, 1901, Chapter VIII. [Wikisource original text, revision 2489933](https://zh.wikisource.org/w/index.php?title=李鴻章傳/08&oldid=2489933), identified as public domain in the USA and countries with copyright terms of life plus 80 years or less. The working edition extracts the chapter body and adds a chapter heading; no modern translation or annotations are included.
+- **Li Hongzhang:** **Russell & Sons**, 1896; source Mrs Archibald Little (1903), *Li Hung Chang: His Life and Times*, Cassell. [Commons source and PD-US statement](https://commons.wikimedia.org/wiki/File:Li_Hung_Chang_in_1896.jpg).
+- **Ito Hirobumi:** [National Diet Library, portrait 12](https://www.ndl.go.jp/portrait/e/datas/12/).
+- **Mutsu Munemitsu:** [National Diet Library, portrait 199](https://www.ndl.go.jp/portrait/e/datas/199/). Source credit for both: **Portraits of Modern Japanese Historical Figures (National Diet Library)**. The [exhibition policy](https://www.ndl.go.jp/portrait/e/about) states that all its portrait images are public domain, permits reuse including commercial use, and requires a source citation. The photographer and capture date are not recorded on these portrait pages.
+- Changes: resized and re-encoded, placed after selected paragraphs with captions. Crops, if any, are recorded in the [demo metadata](../../examples/demos/li-hongzhang.json).
 
-This asset-specific license does not change the MIT license of the software. Merely converting an image format does not by itself create Adapted Material under CC BY-SA 4.0 section 2(a)(4); this notice explicitly licenses the project's own comparison contributions to avoid ambiguity if the arrangement is treated as an adaptation.
+## `carnegie-before-after.webp`
 
-## `sanguo-before-after.webp`
+- Text: **Andrew Carnegie (1835–1919)**, *Autobiography of Andrew Carnegie*, edited by John C. Van Dyke, 1920. Three passages from Chapters I, XIII and XVI, [Project Gutenberg eBook #17976](https://www.gutenberg.org/ebooks/17976). The catalog identifies the text as public domain in the USA.
+- **Andrew Carnegie:** **Frances Benjamin Johnston (1864–1952)**, c. 1905. Library of Congress, Prints & Photographs Division, Frances Benjamin Johnston Collection, **LC-USZ62-88699**. [Catalog and rights statement](https://www.loc.gov/pictures/item/2001704108/): “No known restrictions on reproduction.”
+- **Henry Phipps:** **Bain News Service (publisher)**, no date recorded on caption card. Library of Congress, Prints & Photographs Division, George Grantham Bain Collection, **LC-DIG-ggbain-06856**. [Catalog](https://www.loc.gov/pictures/item/2014686848/).
+- **Henry Clay Frick:** **Bain News Service (publisher)**, between ca. 1915 and ca. 1920. Same collection, **LC-DIG-ggbain-29798**. [Catalog](https://www.loc.gov/pictures/item/2014709956/). Both Bain records state “No known restrictions on publication”; [collection rights statement](https://www.loc.gov/rr/print/res/274_bain.html). This is the institution's rights assessment, not a Creative Commons license.
+- Changes: resized and re-encoded; Phipps and Frick cropped to remove negative borders and labels. [Exact crops and metadata](../../examples/demos/carnegie.json).
 
-- Text: Luo Guanzhong (罗贯中, circa 1330–1400), *三國志演義 / Romance of the Three Kingdoms*, [Project Gutenberg eBook #23950](https://www.gutenberg.org/ebooks/23950), produced by Jian-Lun Huang. The catalog identifies this classical Chinese text as public domain in the USA. No modern translation or publisher's annotations are included; check applicable law where you use it.
-- Historical painting: **Sakurai Sekkan (樱井雪馆 / 櫻井雪館, 1715–1790)**, Liu Bei, Guan Yu and Zhang Fei. Source credited by Commons: **The Field Museum**. [Original source and public-domain rationale](https://commons.wikimedia.org/wiki/File:Three_Brothers_(Bei,_Yu,_Fei).jpg). Commons marks the underlying work PD-old-100 and the faithful two-dimensional reproduction public domain in the USA; its page notes jurisdictional differences in reproduction rights.
-- Changes: resized and re-encoded, placed with a caption inside a comparison of reading excerpts. This is a historical artistic depiction, not a contemporaneous photograph or documentary evidence of the fictional oath.
-- The project contributes its original comparison layout and copyrightable arrangement under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), credit **wavever, 2026**. This adds no restriction to the underlying public-domain text or artwork.
-
-Detailed provenance and reproduction instructions: [examples](../../examples/README.md). Machine-readable status: [demo-manifest.json](../../examples/demo-manifest.json).
+Preserve the relevant credits when sharing comparison assets. Text and photograph rights can vary by jurisdiction. [Reproduction instructions](../../examples/README.md) and [machine-readable manifest](../../examples/demo-manifest.json).

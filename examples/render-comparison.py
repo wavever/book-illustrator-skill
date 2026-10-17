@@ -6,10 +6,17 @@ and script-generated illustrated EPUB outputs. Uses the byte-accurate offset-wal
 logic from the book-illustrator engine and asserts that stripped illustrated text
 is 100% identical to original text.
 
+A demo selects either one passage (`"pids": [...]`) or several labelled passages
+(`"sections": [{"label": "...", "pids": [...]}, ...]`). Each section is a run of
+consecutive paragraphs in one XHTML member; sections may come from different
+chapters or members. Every section is checked on its own, rendered as one aligned
+row (original | illustrated), and a gap between non-adjacent sections is marked
+as omitted text. Optional `"layout"` values style only the rendering copy.
+
 Usage:
-    python3 examples/render-comparison.py --manifest examples/demo-manifest.json --work-dir <path_to_work_books> --name sanguo
-    python3 examples/render-comparison.py --manifest examples/demo-manifest.json --work-dir <path_to_work_books> --name beagle
-    python3 examples/render-comparison.py --manifest examples/demo-manifest.json --work-dir <path_to_work_books> --all
+    python3 examples/render-comparison.py --manifest examples/demo-manifest.json --work-dir <scratch> --name <demo>
+    python3 examples/render-comparison.py --manifest examples/demos/carnegie.json --work-dir <scratch>
+    python3 examples/render-comparison.py --manifest examples/demo-manifest.json --work-dir <scratch> --all
 """
 
 import argparse
@@ -19,6 +26,7 @@ import json
 import mimetypes
 import os
 import pathlib
+import posixpath
 import re
 import shutil
 import subprocess
@@ -26,6 +34,7 @@ import sys
 import tempfile
 import zipfile
 from typing import Dict, List, Optional, Tuple
+from urllib.parse import unquote
 
 from PIL import Image
 
@@ -45,6 +54,21 @@ except ImportError:
 
 BLOCK_RE = re.compile(r"<!--illus(?:-[0-9a-f]{8})?:start-->.*?<!--illus(?:-[0-9a-f]{8})?:end-->", re.DOTALL)
 IMG_SRC_RE = re.compile(r"""(<img\b[^>]*\bsrc\s*=\s*)(["'])(.*?)\2""", re.IGNORECASE)
+IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+
+# Optional per-demo "layout" keys -> (default for zh, default for en). Rendering copy only.
+LAYOUT_DEFAULTS = {
+    "width": (1240, 1240),            # rendered image width, px
+    "font_size": (16, 16),            # body text, px
+    "line_height": (1.8, 1.65),
+    "paragraph_indent": ("2em", "0"),
+    "paragraph_spacing": ("0.9em", "0.9em"),
+    "image_max_height": (None, None),  # px; None keeps the figure block's own inline size
+    "caption_size": (None, None),     # px; None keeps the figure block's own inline size
+    "column_gap": (28, 28),           # px
+    "font_family": (None, None),      # CSS font stack; None = language default
+}
+_CSS_SAFE = re.compile(r"^[\w\s,.'\"#%()-]*$", re.UNICODE)
 
 
 def find_chrome() -> str:
@@ -69,114 +93,169 @@ def find_chrome() -> str:
     raise RuntimeError("Chrome executable not found. Set CHROME=/path/to/chrome")
 
 
+def member_for(bj: dict, f_rel: str, names: List[str]) -> str:
+    """Exact zip member of a book.json paragraph file (paths in book.json are relative to the OPF)."""
+    if bj.get("opf"):
+        member = posixpath.normpath(posixpath.join(posixpath.dirname(bj["opf"]), f_rel))
+        if member in names:
+            return member
+        raise FileNotFoundError(f"Member {member} not found in EPUB")
+    hits = [n for n in names if n == f_rel or n.endswith("/" + f_rel)]
+    if len(hits) != 1:
+        raise FileNotFoundError(f"Expected exactly one member for {f_rel}, found {hits}")
+    return hits[0]
+
+
+def resolve_image(member: str, src: str, names: List[str]) -> Optional[str]:
+    """Zip member an <img src> in `member` points to; relative references only, no basename guessing."""
+    s = html.unescape(src).split("#")[0].split("?")[0]
+    if not s or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", s) or s.startswith("/") or "\\" in s:
+        return None
+    target = posixpath.normpath(posixpath.join(posixpath.dirname(member), unquote(s)))
+    if target.startswith("../") or target not in names or not target.lower().endswith(IMAGE_EXTS):
+        return None
+    return target
+
+
+def inline_images(fragment: str, member: str, z: zipfile.ZipFile) -> str:
+    """Sanitized fragment with each resolvable <img src> as a data: URL; others blanked (CSP blocks them anyway)."""
+    names = z.namelist()
+
+    def repl(m):
+        target = resolve_image(member, m.group(3), names)
+        if target is None:
+            return f'{m.group(1)}"{static_page.BLANK}"'
+        mime = mimetypes.guess_type(target)[0] or "image/jpeg"
+        return f'{m.group(1)}"data:{mime};base64,{base64.b64encode(z.read(target)).decode("ascii")}"'
+
+    return IMG_SRC_RE.sub(repl, static_page.sanitize(fragment))
+
+
+def walk_range(illus_raw: str, a: int, b: int) -> str:
+    """Illustrated text covering original offsets [a, b) plus blocks inserted in (a, b]."""
+    i = orig = 0
+    piece = []
+    for m in list(BLOCK_RE.finditer(illus_raw)) + [None]:
+        seg = illus_raw[i: m.start() if m else len(illus_raw)]
+        lo, hi = max(orig, a), min(orig + len(seg), b)
+        if lo < hi:
+            piece.append(seg[lo - orig: hi - orig])
+        orig += len(seg)
+        if m:
+            if a < orig <= b:
+                piece.append(m.group(0))
+            i = m.end()
+    return "".join(piece)
+
+
+def normalize_sections(demo: dict) -> List[dict]:
+    """Sections of a manifest demo; a legacy top-level "pids" list is one unlabelled section."""
+    if demo.get("sections"):
+        out = []
+        for s in demo["sections"]:
+            if not s.get("pids"):
+                raise ValueError(f"Section without pids: {s}")
+            out.append({"label": s.get("label"), "pids": list(s["pids"])})
+        return out
+    if demo.get("pids"):
+        return [{"label": None, "pids": list(demo["pids"])}]
+    raise ValueError("Demo needs 'pids' or 'sections'")
+
+
+def extract_sections(
+    orig_epub_path: str,
+    illus_epub_path: str,
+    book_json_path: str,
+    sections: List[dict],
+) -> List[dict]:
+    """Per section: original and illustrated HTML (sanitized, images inlined), each independently verified.
+
+    A section must be consecutive paragraphs (book order) of one member, so nothing omitted inside a
+    section can pass as continuous text. `adjacent` tells whether it directly follows the previous one.
+    """
+    for p, what in ((orig_epub_path, "Original EPUB"), (illus_epub_path, "Illustrated EPUB"), (book_json_path, "book.json")):
+        if not os.path.exists(p):
+            raise FileNotFoundError(f"{what} not found: {p}")
+    with open(book_json_path, encoding="utf-8") as f:
+        bj = json.load(f)
+    index = {p["pid"]: n for n, p in enumerate(bj["paras"])}
+
+    out = []
+    prev = None  # (member, end offset, original text) of the previous section
+    with zipfile.ZipFile(orig_epub_path) as zo, zipfile.ZipFile(illus_epub_path) as zi:
+        for sec in sections:
+            missing = [pid for pid in sec["pids"] if pid not in index]
+            if missing:
+                raise ValueError(f"pids not in book.json: {missing}")
+            idx = [index[pid] for pid in sec["pids"]]
+            if idx != list(range(idx[0], idx[0] + len(idx))):
+                raise ValueError(f"Section pids must be consecutive paragraphs in book order: {sec['pids']}; "
+                                 "split non-adjacent passages into separate sections")
+            paras = [bj["paras"][n] for n in idx]
+            f_rel = paras[0]["file"]
+            if any(p["file"] != f_rel for p in paras):
+                raise ValueError(f"Section spans several files: {sec['pids']}; use one section per file")
+
+            a = paras[0]["start"]
+            last = paras[-1]
+            b = last["end"] if last.get("ins") is None else last["ins"]
+            declared_enc = bj.get("encodings", {}).get(f_rel) or bj.get("source", {}).get("encoding")
+
+            o_member = member_for(bj, f_rel, zo.namelist())
+            i_member = member_for(bj, f_rel, zi.namelist())
+            orig_raw, _ = native_decode(zo.read(o_member), "xml", declared_enc)
+            illus_raw, _ = native_decode(zi.read(i_member), "xml", declared_enc)
+            orig_frag = orig_raw[a:b]
+            illus_frag = walk_range(illus_raw, a, b)
+
+            if BLOCK_RE.search(orig_frag) or BLOCK_RE.sub("", illus_frag) != orig_frag:
+                raise AssertionError(
+                    f"Truthfulness verification failed for section {sec.get('label') or sec['pids']}: "
+                    "stripped illustrated excerpt does not strictly match original excerpt!"
+                )
+
+            out.append({
+                "label": sec.get("label"),
+                "pids": list(sec["pids"]),
+                "member": i_member,
+                # adjacent only when nothing but whitespace separates it from the previous section
+                "adjacent": bool(prev) and prev[0] == o_member and prev[1] <= a and not prev[2][prev[1]:a].strip(),
+                "figures": len(BLOCK_RE.findall(illus_frag)),
+                # Render copies only: drop the book's active content; the page CSP allows data: images only
+                "orig_html": inline_images(orig_frag, o_member, zo),
+                "illus_html": inline_images(illus_frag, i_member, zi),
+            })
+            prev = (o_member, b, orig_raw)
+    return out
+
+
 def extract_fragments(
     orig_epub_path: str,
     illus_epub_path: str,
     book_json_path: str,
     pids: List[str],
 ) -> Tuple[str, str, Dict[str, bytes]]:
-    """Extract identical original and illustrated HTML fragments plus embedded images."""
-    if not os.path.exists(orig_epub_path):
-        raise FileNotFoundError(f"Original EPUB not found: {orig_epub_path}")
-    if not os.path.exists(illus_epub_path):
-        raise FileNotFoundError(f"Illustrated EPUB not found: {illus_epub_path}")
-    if not os.path.exists(book_json_path):
-        raise FileNotFoundError(f"book.json not found: {book_json_path}")
+    """Single-passage form (legacy API): original and illustrated HTML of one run of paragraphs."""
+    sec = extract_sections(orig_epub_path, illus_epub_path, book_json_path, [{"label": None, "pids": pids}])[0]
+    return sec["orig_html"], sec["illus_html"], {}
 
-    with open(book_json_path, encoding="utf-8") as f:
-        bj = json.load(f)
 
-    paras = [p for p in bj["paras"] if p["pid"] in pids]
-    if not paras:
-        raise ValueError(f"None of the requested pids found in book.json: {pids}")
-
-    f_rel = paras[0]["file"]
-    for p in paras:
-        if p["file"] != f_rel:
-            raise ValueError("All requested paragraphs in an excerpt must belong to the same HTML file.")
-
-    a = paras[0]["start"]
-    b = max(p["end"] if p.get("ins", p["end"]) is None else p.get("ins", p["end"]) for p in paras)
-
-    # Encoding determination from book.json metadata
-    declared_enc = bj.get("encodings", {}).get(f_rel) or bj.get("source", {}).get("encoding")
-
-    # 1. Read original HTML file from original EPUB
-    orig_raw_bytes = None
-    with zipfile.ZipFile(orig_epub_path) as z:
-        for name in z.namelist():
-            if name.endswith(f_rel):
-                orig_raw_bytes = z.read(name)
-                break
-    if orig_raw_bytes is None:
-        raise FileNotFoundError(f"Could not locate member ending with {f_rel} in {orig_epub_path}")
-
-    orig_raw, _ = native_decode(orig_raw_bytes, "xml", declared_enc)
-    orig_frag = orig_raw[a:b]
-
-    # 2. Read illustrated HTML file from illustrated EPUB and walk offsets
-    illus_raw_bytes = None
-    images: Dict[str, bytes] = {}
-    with zipfile.ZipFile(illus_epub_path) as z:
-        for name in z.namelist():
-            if name.endswith(f_rel):
-                illus_member_dir = os.path.dirname(name)
-                illus_raw_bytes = z.read(name)
-                break
-        # Pre-cache all images in the illustrated EPUB
-        for name in z.namelist():
-            ext = os.path.splitext(name)[1].lower()
-            if ext in (".jpg", ".jpeg", ".png", ".webp", ".gif"):
-                images[name] = z.read(name)
-                if illus_member_dir and name.startswith(illus_member_dir + "/"):
-                    rel = name[len(illus_member_dir) + 1 :]
-                    images[rel] = images[name]
-                images[os.path.basename(name)] = images[name]
-
-    if illus_raw_bytes is None:
-        raise FileNotFoundError(f"Could not locate member ending with {f_rel} in {illus_epub_path}")
-
-    illus_raw, _ = native_decode(illus_raw_bytes, "xml", declared_enc)
-
-    # Walk the built file using position-walking logic
-    i = orig = 0
-    piece = []
-    for m in list(BLOCK_RE.finditer(illus_raw)) + [None]:
-        seg = illus_raw[i : m.start() if m else len(illus_raw)]
-        lo, hi = max(orig, a), min(orig + len(seg), b)
-        if lo < hi:
-            piece.append(seg[lo - orig : hi - orig])
-        orig += len(seg)
-        if m:
-            if a < orig <= b:
-                piece.append(m.group(0))
-            i = m.end()
-
-    illus_frag = "".join(piece)
-
-    # Rigorous byte/text assertion: stripped illustrated excerpt MUST equal original excerpt
-    stripped = BLOCK_RE.sub("", illus_frag)
-    if stripped != orig_frag:
-        raise AssertionError(
-            "Truthfulness verification failed: stripped illustrated excerpt does not strictly match original excerpt!"
-        )
-
-    # Convert relative img src to base64 data URIs
-    def inline_img(match):
-        prefix, quote, src = match.group(1), match.group(2), match.group(3)
-        clean_src = src.split("?")[0].split("#")[0]
-        data = images.get(clean_src) or images.get(os.path.basename(clean_src))
-        if data:
-            mime = mimetypes.guess_type(clean_src)[0] or "image/jpeg"
-            b64 = base64.b64encode(data).decode("ascii")
-            return f'{prefix}"data:{mime};base64,{b64}"'
-        return match.group(0)
-
-    # Render copies only: drop the book's active content; the page CSP allows data: images only
-    illus_frag = IMG_SRC_RE.sub(inline_img, static_page.sanitize(illus_frag))
-    orig_frag = IMG_SRC_RE.sub(inline_img, static_page.sanitize(orig_frag))
-
-    return orig_frag, illus_frag, images
+def resolve_layout(lang: str, layout: Optional[dict] = None, width: Optional[int] = None) -> dict:
+    """Layout values with language defaults; rejects values that could break out of the CSS."""
+    zh = lang.startswith("zh")
+    out = {k: v[0 if zh else 1] for k, v in LAYOUT_DEFAULTS.items()}
+    if width:
+        out["width"] = width
+    for k, v in (layout or {}).items():
+        if k not in LAYOUT_DEFAULTS:
+            raise ValueError(f"Unknown layout key: {k}")
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            out[k] = v
+        elif isinstance(v, str) and _CSS_SAFE.match(v):
+            out[k] = v
+        elif v is not None:
+            raise ValueError(f"Unsafe layout value for {k}: {v!r}")
+    return out
 
 
 def build_comparison_html(
@@ -185,29 +264,57 @@ def build_comparison_html(
     meta_tag: str,
     label_left: str,
     label_right: str,
-    orig_html: str,
-    illus_html: str,
+    orig_html: Optional[str] = None,
+    illus_html: Optional[str] = None,
     lang: str = "zh",
     canvas_width: int = 1240,
+    sections: Optional[List[dict]] = None,
+    layout: Optional[dict] = None,
 ) -> str:
-    """Build a side-by-side comparison page in a warm paper aesthetic."""
+    """Side-by-side comparison page in a warm paper aesthetic; one aligned row per section."""
     is_zh = lang.startswith("zh")
-    font_stack = (
+    L = resolve_layout(lang, layout, canvas_width if layout is None or "width" not in layout else None)
+    font_stack = L["font_family"] or (
         "'PingFang SC', 'Source Han Serif SC', 'Songti SC', 'Noto Serif CJK SC', serif"
         if is_zh
         else "'Charter', 'Georgia', 'Iowan Old Style', 'Times New Roman', serif"
     )
-
-    clean_orig = orig_html.strip()
-    clean_illus = illus_html.strip()
+    if sections is None:
+        sections = [{"label": None, "orig_html": orig_html or "", "illus_html": illus_html or "", "adjacent": False}]
 
     badge_orig_text = "原文内容" if is_zh else "Original Text"
-    badge_illus_text = "插入真实图片" if is_zh else "Real Photo Injected"
-    footer_text = (
-        "原文内容保持字节级未修改；仅在段落间插入配图块，移除配图后与原书完全一致。"
-        if is_zh
-        else "Original text content is byte-identical outside injected illustration blocks."
-    )
+    badge_illus_text = "插入真实图片" if is_zh else "Real Photos Inserted"
+    omitted_text = "（中间段落省略）" if is_zh else "· · ·  intervening text omitted  · · ·"
+    if len(sections) > 1:
+        footer_text = (
+            "每段摘录分别校验：移除插入的配图块后，与原书对应段落逐字节一致；摘录之间的原文已省略。"
+            if is_zh
+            else "Each excerpt is checked separately: with the inserted figure blocks removed, it is byte-identical "
+                 "to the original passage. Text between excerpts is omitted."
+        )
+    else:
+        footer_text = (
+            "原文内容保持字节级未修改；仅在段落间插入配图块，移除配图后与原书完全一致。"
+            if is_zh
+            else "Original text content is byte-identical outside injected illustration blocks."
+        )
+
+    img_rule = ""
+    if L["image_max_height"]:
+        img_rule += (f".cell .illus-figure img {{ max-height: {L['image_max_height']}px !important; "
+                     "width: auto !important; max-width: 100% !important; }}\n")
+    if L["caption_size"]:
+        img_rule += f".cell .illus-figure p {{ font-size: {L['caption_size']}px !important; }}\n"
+
+    rows = []
+    for n, sec in enumerate(sections):
+        if n and not sec.get("adjacent"):
+            rows.append(f'<div class="gap">{html.escape(omitted_text)}</div>')
+        if sec.get("label"):
+            rows.append(f'<div class="sec-label">{html.escape(sec["label"])}</div>')
+        rows.append(f'<div class="cell">{sec["orig_html"].strip()}</div>')
+        rows.append(f'<div class="cell cell-illus">{sec["illus_html"].strip()}</div>')
+    body_rows = "\n    ".join(rows)
 
     return f"""<!DOCTYPE html>
 <html lang="{html.escape(lang)}">
@@ -218,26 +325,22 @@ def build_comparison_html(
   * {{ box-sizing: border-box; }}
   body {{
     margin: 0;
-    padding: 32px 24px;
+    padding: 32px 28px;
     background: #fbf8f1;
     color: #24211e;
     font-family: {font_stack};
     -webkit-font-smoothing: antialiased;
   }}
-  .container {{
-    max-width: {canvas_width}px;
-    margin: 0 auto;
-    background: #fbf8f1;
-  }}
+  .container {{ max-width: {L['width'] - 56}px; margin: 0 auto; }}
   .header {{
     text-align: center;
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    margin-bottom: 22px;
+    padding-bottom: 14px;
     border-bottom: 1px solid #e7ded0;
   }}
   .header .meta-tag {{
     display: inline-block;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #8c8273;
@@ -247,97 +350,65 @@ def build_comparison_html(
     margin-bottom: 8px;
     font-weight: 600;
   }}
-  .header h1 {{
-    margin: 4px 0 2px 0;
-    font-size: 22px;
-    font-weight: 700;
-    color: #1e1b18;
-    letter-spacing: -0.01em;
-  }}
-  .header .subtitle {{
-    margin: 0;
-    font-size: 14px;
-    color: #6d6457;
-  }}
-  .columns {{
+  .header h1 {{ margin: 4px 0 2px 0; font-size: 26px; font-weight: 700; color: #1e1b18; }}
+  .header .subtitle {{ margin: 0; font-size: 15px; color: #6d6457; }}
+  .grid {{
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 28px;
-  }}
-  .column {{
+    column-gap: {L['column_gap']}px;
     background: #ffffff;
     border: 1px solid #e4dcd0;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(60, 50, 40, 0.04);
-    display: flex;
-    flex-direction: column;
     overflow: hidden;
   }}
   .column-head {{
     background: #f5efe4;
-    padding: 10px 18px;
+    padding: 10px 22px;
     border-bottom: 1px solid #e7ded0;
     display: flex;
     align-items: center;
     justify-content: space-between;
   }}
-  .column-label {{
+  .column-label {{ font-size: 14px; font-weight: 700; letter-spacing: 0.04em; color: #4a4237; }}
+  .column-badge {{ font-size: 12px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }}
+  .badge-orig {{ background: #e9e2d5; color: #5c5346; }}
+  .badge-illus {{ background: #2f6f4e; color: #ffffff; }}
+  .sec-label {{
+    grid-column: 1 / -1;
+    padding: 14px 22px 0 22px;
     font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.04em;
-    color: #4a4237;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8c8273;
   }}
-  .column-badge {{
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: 600;
-  }}
-  .badge-orig {{
-    background: #e9e2d5;
-    color: #5c5346;
-  }}
-  .badge-illus {{
-    background: #2f6f4e;
-    color: #ffffff;
-  }}
-  .column-body {{
-    padding: 28px 24px;
-    font-size: 16px;
-    line-height: 1.8;
-    color: #262320;
-    flex: 1;
-  }}
-  .column-body p {{
-    margin: 0 0 1em 0;
-    text-align: justify;
-    text-indent: {"2em" if is_zh else "0"};
-  }}
-  .column-body p:last-child {{
-    margin-bottom: 0;
-  }}
-  .column-body h1, .column-body h2, .column-body h3, .column-body h4 {{
-    text-align: center;
-    text-indent: 0;
-    margin: 0 0 0.8em 0;
-    color: #1e1b18;
-    line-height: 1.35;
-  }}
-  .column-body img {{
-    height: auto;
-  }}
-  .illus-figure {{
-    margin: 1.2em 0 1.4em 0 !important;
-    text-align: center !important;
-    text-indent: 0 !important;
-  }}
-  .footer-note {{
-    margin-top: 18px;
+  .gap {{
+    grid-column: 1 / -1;
+    margin: 0 22px;
+    padding: 8px 0 0 0;
+    border-top: 1px dashed #ddd3c3;
     text-align: center;
     font-size: 12px;
-    color: #8c8273;
-    line-height: 1.5;
+    color: #a39885;
   }}
+  .cell {{
+    padding: 10px 22px 18px 22px;
+    font-size: {L['font_size']}px;
+    line-height: {L['line_height']};
+    color: #262320;
+  }}
+  .cell-illus {{ border-left: 1px solid #f0e9dd; }}
+  .cell p {{ margin: 0 0 {L['paragraph_spacing']} 0; text-align: justify; text-indent: {L['paragraph_indent']}; }}
+  .cell p:last-child {{ margin-bottom: 0; }}
+  .cell h1, .cell h2, .cell h3, .cell h4 {{
+    text-align: center; text-indent: 0; margin: 0 0 0.8em 0; color: #1e1b18; line-height: 1.35;
+  }}
+  .cell img {{ height: auto; }}
+  .cell a {{ color: inherit; text-decoration: none; }}
+  .illus-figure {{ margin: 1em 0 1.1em 0 !important; text-align: center !important; text-indent: 0 !important; }}
+  .illus-figure p {{ text-align: center !important; text-indent: 0 !important; }}
+  {img_rule}
+  .footer-note {{ margin-top: 16px; text-align: center; font-size: 13px; color: #8c8273; line-height: 1.5; }}
 </style>
 </head>
 <body>
@@ -347,25 +418,16 @@ def build_comparison_html(
     <h1>{html.escape(title)}</h1>
     <div class="subtitle">{html.escape(subtitle)}</div>
   </div>
-  <div class="columns">
-    <div class="column">
-      <div class="column-head">
-        <span class="column-label">{html.escape(label_left)}</span>
-        <span class="column-badge badge-orig">{html.escape(badge_orig_text)}</span>
-      </div>
-      <div class="column-body">
-        {clean_orig}
-      </div>
+  <div class="grid">
+    <div class="column-head">
+      <span class="column-label">{html.escape(label_left)}</span>
+      <span class="column-badge badge-orig">{html.escape(badge_orig_text)}</span>
     </div>
-    <div class="column">
-      <div class="column-head">
-        <span class="column-label">{html.escape(label_right)}</span>
-        <span class="column-badge badge-illus">{html.escape(badge_illus_text)}</span>
-      </div>
-      <div class="column-body">
-        {clean_illus}
-      </div>
+    <div class="column-head">
+      <span class="column-label">{html.escape(label_right)}</span>
+      <span class="column-badge badge-illus">{html.escape(badge_illus_text)}</span>
     </div>
+    {body_rows}
   </div>
   <div class="footer-note">
     {html.escape(footer_text)}
@@ -382,8 +444,8 @@ def render_to_image(
     chrome_path: str,
     canvas_width: int = 1240,
     quality: int = 90,
-) -> None:
-    """Render HTML to WebP using headless Chrome and Pillow post-processing."""
+) -> Tuple[int, int]:
+    """Render HTML to WebP using headless Chrome and Pillow post-processing; returns (width, height)."""
     tmp_dir = tempfile.mkdtemp(prefix="book-illustrator-render-")
     try:
         html_file = os.path.join(tmp_dir, "page.html")
@@ -429,6 +491,7 @@ def render_to_image(
 
         out_size = os.path.getsize(output_path)
         print(f"Rendered: {output_path} ({cropped.width}x{cropped.height}px, {out_size / 1024:.1f} KB)")
+        return cropped.width, cropped.height
     finally:
         shutil.rmtree(tmp_dir, ignore_errors=True)
 
@@ -442,16 +505,54 @@ def resolve_manifest_path(path_val: str, work_dir: Optional[str]) -> str:
     return os.path.abspath(path_val)
 
 
+def load_demos(manifest_path: str) -> Dict[str, dict]:
+    """Demos of a manifest ({"demos": {...}}) or of a single per-book demo file."""
+    with open(manifest_path, encoding="utf-8") as f:
+        data = json.load(f)
+    if "demos" in data:
+        return data["demos"]
+    key = data.get("book_id") or os.path.splitext(os.path.basename(manifest_path))[0]
+    return {key: data}
+
+
+def render_demo(d: dict, work_dir: Optional[str], chrome: str, out: Optional[str] = None) -> dict:
+    rp = d.get("relative_paths", {})
+    secs = extract_sections(
+        orig_epub_path=resolve_manifest_path(rp.get("orig_epub", d.get("orig_epub", "")), work_dir),
+        illus_epub_path=resolve_manifest_path(rp.get("illus_epub", d.get("illus_epub", "")), work_dir),
+        book_json_path=resolve_manifest_path(rp.get("book_json", d.get("book_json", "")), work_dir),
+        sections=normalize_sections(d),
+    )
+    lang = d.get("lang", "zh")
+    layout = resolve_layout(lang, d.get("layout"), d.get("width"))
+    page_html = build_comparison_html(
+        title=d["title"],
+        subtitle=d["subtitle"],
+        meta_tag=d.get("meta_tag", "Reading Excerpt Comparison"),
+        label_left=d.get("label_orig", "Original"),
+        label_right=d.get("label_illus", "Illustrated"),
+        lang=lang,
+        sections=secs,
+        layout=layout,
+    )
+    size = render_to_image(page_html, out or d["output"], chrome, canvas_width=layout["width"],
+                           quality=d.get("quality", 90))
+    for s in secs:
+        print(f"  section {s['label'] or '-'}: {','.join(s['pids'])} in {s['member']}, "
+              f"{s['figures']} block(s), verified")
+    return {"size": size, "figures": sum(s["figures"] for s in secs), "sections": len(secs)}
+
+
 def main():
     parser = argparse.ArgumentParser(description="Render comparison demo images.")
-    parser.add_argument("--manifest", help="Path to demo manifest JSON file")
+    parser.add_argument("--manifest", help="Demo manifest JSON ({\"demos\": {...}}) or a single per-book demo JSON")
     parser.add_argument("--work-dir", help="Working directory containing scratch books/demos")
     parser.add_argument("--name", help="Specific demo name from manifest to render")
     parser.add_argument("--all", action="store_true", help="Render all demos in manifest")
     parser.add_argument("--orig", help="Path to original EPUB")
     parser.add_argument("--illus", help="Path to illustrated EPUB")
     parser.add_argument("--book-json", help="Path to book.json")
-    parser.add_argument("--pids", help="Comma-separated paragraph IDs")
+    parser.add_argument("--pids", help="Comma-separated paragraph IDs (one passage)")
     parser.add_argument("--title", help="Demo title")
     parser.add_argument("--subtitle", help="Demo subtitle")
     parser.add_argument("--meta-tag", default="Reading Excerpt Comparison", help="Top badge text")
@@ -466,15 +567,12 @@ def main():
     chrome = find_chrome()
 
     if args.manifest:
-        with open(args.manifest, encoding="utf-8") as f:
-            manifest_data = json.load(f)
-
-        demos = manifest_data.get("demos", {})
+        demos = load_demos(args.manifest)
         if args.name:
             if args.name not in demos:
                 sys.exit(f"Demo '{args.name}' not found in {args.manifest}. Available: {list(demos.keys())}")
             selected = {args.name: demos[args.name]}
-        elif args.all:
+        elif args.all or len(demos) == 1:
             selected = demos
         else:
             sys.exit("Please specify --name <demo_key> or --all when using --manifest.")
@@ -482,36 +580,7 @@ def main():
         work_dir = args.work_dir or os.environ.get("BOOK_DEMOS_DIR")
         for k, d in selected.items():
             print(f"--- Rendering demo: {k} ---")
-            rp = d.get("relative_paths", {})
-            orig_epub = resolve_manifest_path(rp.get("orig_epub", d.get("orig_epub", "")), work_dir)
-            illus_epub = resolve_manifest_path(rp.get("illus_epub", d.get("illus_epub", "")), work_dir)
-            book_json = resolve_manifest_path(rp.get("book_json", d.get("book_json", "")), work_dir)
-
-            orig_frag, illus_frag, _ = extract_fragments(
-                orig_epub_path=orig_epub,
-                illus_epub_path=illus_epub,
-                book_json_path=book_json,
-                pids=d["pids"],
-            )
-            page_html = build_comparison_html(
-                title=d["title"],
-                subtitle=d["subtitle"],
-                meta_tag=d.get("meta_tag", "Reading Excerpt Comparison"),
-                label_left=d.get("label_orig", "Original"),
-                label_right=d.get("label_illus", "Illustrated"),
-                orig_html=orig_frag,
-                illus_html=illus_frag,
-                lang=d.get("lang", "zh"),
-                canvas_width=d.get("width", 1240),
-            )
-            out_file = args.out or d["output"]
-            render_to_image(
-                page_html=page_html,
-                output_path=out_file,
-                chrome_path=chrome,
-                canvas_width=d.get("width", 1240),
-                quality=d.get("quality", 90),
-            )
+            render_demo(d, work_dir, chrome, args.out)
         return
 
     # Direct CLI usage
@@ -519,30 +588,10 @@ def main():
         sys.exit("Error: Must provide either --manifest or all of --orig, --illus, --book-json, --pids, and --out.")
 
     pids_list = [p.strip() for p in args.pids.split(",") if p.strip()]
-    orig_frag, illus_frag, _ = extract_fragments(
-        orig_epub_path=args.orig,
-        illus_epub_path=args.illus,
-        book_json_path=args.book_json,
-        pids=pids_list,
-    )
-    page_html = build_comparison_html(
-        title=args.title or "Reading Excerpt",
-        subtitle=args.subtitle or "",
-        meta_tag=args.meta_tag,
-        label_left=args.label_orig,
-        label_right=args.label_illus,
-        orig_html=orig_frag,
-        illus_html=illus_frag,
-        lang=args.lang,
-        canvas_width=args.width,
-    )
-    render_to_image(
-        page_html=page_html,
-        output_path=args.out,
-        chrome_path=chrome,
-        canvas_width=args.width,
-        quality=args.quality,
-    )
+    render_demo({"orig_epub": args.orig, "illus_epub": args.illus, "book_json": args.book_json, "pids": pids_list,
+                 "title": args.title or "Reading Excerpt", "subtitle": args.subtitle or "", "meta_tag": args.meta_tag,
+                 "label_orig": args.label_orig, "label_illus": args.label_illus, "lang": args.lang,
+                 "width": args.width, "quality": args.quality}, None, chrome, args.out)
 
 
 if __name__ == "__main__":

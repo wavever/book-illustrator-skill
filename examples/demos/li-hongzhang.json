@@ -1,0 +1,240 @@
+{
+  "book_id": "li-hongzhang",
+  "title": "李鴻章傳",
+  "subtitle": "第八章：外交家之李鴻章（上）· 梁啟超（1901）",
+  "meta_tag": "古典名著閱讀樣張對比 · 梁啟超著 · 維基文庫 (WIKISOURCE) 修訂版 2489933",
+  "lang": "zh",
+  "label_orig": "原文 (Original)",
+  "label_illus": "配圖後 (Illustrated)",
+  "sections": [
+    {
+      "label": "第八章选段 · 李鴻章",
+      "pids": [
+        "p00002"
+      ]
+    },
+    {
+      "label": "第八章选段 · 伊藤博文",
+      "pids": [
+        "p00006"
+      ]
+    },
+    {
+      "label": "第八章选段 · 陸奧宗光",
+      "pids": [
+        "p00009"
+      ]
+    }
+  ],
+  "relative_paths": {
+    "orig_epub": "li-hongzhang/original.epub",
+    "illus_epub": "li-hongzhang/li-hongzhang_illustrated.epub",
+    "book_json": "li-hongzhang/book.json"
+  },
+  "output": "docs/assets/li-hongzhang-before-after.webp",
+  "layout": {
+    "width": 1500,
+    "font_size": 20,
+    "line_height": 1.75,
+    "paragraph_indent": "2em",
+    "paragraph_spacing": "0.9em",
+    "image_max_height": 240,
+    "caption_size": 14,
+    "column_gap": 28
+  },
+  "quality": 90,
+  "source_excerpt": {
+    "book": "李鴻章傳",
+    "author": "梁啟超 (Liang Qichao, 1873–1929)",
+    "edition": "維基文庫 (Wikisource) 原文章體，固定修訂版 2489933；作品出版於 1901 年",
+    "source_url": "https://zh.wikisource.org/wiki/李鴻章傳/08",
+    "permanent_url": "https://zh.wikisource.org/w/index.php?title=%E6%9D%8E%E9%B4%BB%E7%AB%A0%E5%82%B3/08&oldid=2489933",
+    "revid": 2489933,
+    "timestamp": "2024-11-12T02:35:34Z",
+    "chapter": "第八章 外交家之李鴻章（上）",
+    "excerpts": [
+      {
+        "label": "第八章选段 · 李鴻章",
+        "pids": [
+          "p00002"
+        ],
+        "characters_count": 78
+      },
+      {
+        "label": "第八章选段 · 伊藤博文",
+        "pids": [
+          "p00006"
+        ],
+        "characters_count": 252
+      },
+      {
+        "label": "第八章选段 · 陸奧宗光",
+        "pids": [
+          "p00009"
+        ],
+        "characters_count": 240
+      }
+    ],
+    "selection_note": "三個選自第八章的獨立段落，完整保留原段落文本，未作任何增刪或現代改寫；配圖塊插入於段落後。",
+    "rights": "Public domain in China and the USA (author died in 1929; published in 1901; classical Chinese text)."
+  },
+  "illustrations": [
+    {
+      "entity": "li_hongzhang",
+      "at": "p00002",
+      "subject": "Li Hongzhang (李鴻章, 1823–1901)",
+      "caption": "李鴻章（1823—1901）· 晚清洋務運動與外交重臣",
+      "note": "1896年資料照 · Russell & Sons",
+      "medium": "Photographic print",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Li_Hung_Chang_in_1896.jpg",
+      "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Li_Hung_Chang_in_1896.jpg",
+      "author": "Russell & Sons",
+      "date": "1896",
+      "credit": "Mrs. Archibald Little (1903). Li Hung-Chang: His Life and Times. London: Cassell & Company. Photographer: Russell & Sons (1896).",
+      "license": "Public domain (PD-US per Commons)",
+      "license_url": "https://commons.wikimedia.org/wiki/File:Li_Hung_Chang_in_1896.jpg",
+      "changes": "Downscaled and re-encoded as JPEG by export.py; shown at reduced size in the comparison",
+      "identity_check": "Photographic portrait by Russell & Sons (1896); facial features and official regalia consistent with independent Library of Congress portraits (1879 portrait with Grant, https://www.loc.gov/item/2016647812/ ; 1900 portrait by James Ricalton, https://www.loc.gov/item/94505471/)"
+    },
+    {
+      "entity": "ito_hirobumi",
+      "at": "p00006",
+      "subject": "Ito Hirobumi (伊藤博文, 1841–1909)",
+      "caption": "伊藤博文（1841—1909）· 日本內閣總理大臣",
+      "note": "歷史照片 · 日本國立國會圖書館藏",
+      "medium": "Photographic portrait print",
+      "source_page": "https://www.ndl.go.jp/portrait/e/datas/12/",
+      "image_url": "https://www.ndl.go.jp/portrait/img/portrait/0012_1.jpg",
+      "author": "Unknown photographer (not recorded on NDL page)",
+      "date": "Undated historical portrait photograph",
+      "credit": "Portraits of Modern Japanese Historical Figures (National Diet Library)",
+      "license": "Public domain (NDL exhibition reproduction policy: all portrait images in public domain)",
+      "license_url": "https://www.ndl.go.jp/portrait/e/about",
+      "changes": "Downscaled and re-encoded as JPEG by export.py; shown at reduced size in the comparison",
+      "identity_check": "Primary photographic portrait from National Diet Library exhibition Portraits of Modern Japanese Historical Figures (Item 12); facial features corroborated by independent younger official portrait from Prime Minister of Japan and His Cabinet (Kantei, https://www.kantei.go.jp/jp/rekidainaikaku/007.html , rekidai-index-07-itou.jpg)"
+    },
+    {
+      "entity": "mutsu_munemitsu",
+      "at": "p00009",
+      "subject": "Mutsu Munemitsu (陸奥宗光, 1844–1897)",
+      "caption": "陸奧宗光（1844—1897）· 日本外務大臣",
+      "note": "歷史照片 · 日本國立國會圖書館藏",
+      "medium": "Photographic portrait print",
+      "source_page": "https://www.ndl.go.jp/portrait/e/datas/199/",
+      "image_url": "https://www.ndl.go.jp/portrait/img/portrait/0199_1.jpg",
+      "author": "Unknown photographer (not recorded on NDL page)",
+      "date": "Undated historical portrait photograph",
+      "credit": "Portraits of Modern Japanese Historical Figures (National Diet Library)",
+      "license": "Public domain (NDL exhibition reproduction policy: all portrait images in public domain)",
+      "license_url": "https://www.ndl.go.jp/portrait/e/about",
+      "changes": "Downscaled and re-encoded as JPEG by export.py; shown at reduced size in the comparison",
+      "identity_check": "Primary photographic portrait from National Diet Library exhibition Portraits of Modern Japanese Historical Figures (Item 199); corroborated by distinct front-facing archival photograph from Japan Center for Asian Historical Records (JACAR, https://www.jacar.go.jp/exhibition/nichiro/minister.htm , img3/mutsu_thumb.jpg; Bunka Agency image is from the same sitting as NDL)"
+    }
+  ],
+  "entities": {
+    "book": "李鴻章傳",
+    "settings": {
+      "inline": true,
+      "gallery": false,
+      "sources": [
+        "manifest"
+      ],
+      "credits": true,
+      "credits_title": "圖片來源"
+    },
+    "entities": [
+      {
+        "id": "li_hongzhang",
+        "name": "李鴻章",
+        "type": "person",
+        "at": "p00002",
+        "pick": "mf_254b4ef78233.jpg",
+        "match": [
+          "李鴻章之負重望於外國也以外交"
+        ],
+        "role": "晚清洋務運動與外交重臣",
+        "caption": "李鴻章（1823—1901）· 晚清洋務運動與外交重臣",
+        "note": "1896年資料照 · Russell & Sons"
+      },
+      {
+        "id": "ito_hirobumi",
+        "name": "伊藤博文",
+        "type": "person",
+        "at": "p00006",
+        "pick": "mf_ebe16fb93079.jpg",
+        "match": [
+          "伊藤博文"
+        ],
+        "role": "日本內閣總理大臣",
+        "caption": "伊藤博文（1841—1909）· 日本內閣總理大臣",
+        "note": "歷史照片 · 日本國立國會圖書館藏"
+      },
+      {
+        "id": "mutsu_munemitsu",
+        "name": "陸奧宗光",
+        "type": "person",
+        "at": "p00009",
+        "pick": "mf_8adba90b20db.jpg",
+        "match": [
+          "陸奧宗光"
+        ],
+        "role": "日本外務大臣",
+        "caption": "陸奧宗光（1844—1897）· 日本外務大臣",
+        "note": "歷史照片 · 日本國立國會圖書館藏"
+      }
+    ]
+  },
+  "image_manifest": {
+    "version": 1,
+    "candidates": [
+      {
+        "entity": "li_hongzhang",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Li_Hung_Chang_in_1896.jpg",
+        "source_page": "https://commons.wikimedia.org/wiki/File:Li_Hung_Chang_in_1896.jpg",
+        "title": "Li Hung Chang in 1896",
+        "author": "Russell & Sons",
+        "date": "1896",
+        "credit": "Mrs. Archibald Little (1903). Li Hung-Chang: His Life and Times. London: Cassell & Company. Photographer: Russell & Sons (1896).",
+        "license": "Public domain (PD-US per Commons)",
+        "license_url": "https://commons.wikimedia.org/wiki/File:Li_Hung_Chang_in_1896.jpg",
+        "query": "Li Hung Chang in 1896 Russell & Sons"
+      },
+      {
+        "entity": "ito_hirobumi",
+        "image_url": "https://www.ndl.go.jp/portrait/img/portrait/0012_1.jpg",
+        "source_page": "https://www.ndl.go.jp/portrait/e/datas/12/",
+        "title": "Ito, Hirobumi (伊藤博文, 1841–1909)",
+        "author": "Unknown photographer (not recorded on NDL page)",
+        "date": "Undated historical portrait photograph",
+        "credit": "Portraits of Modern Japanese Historical Figures (National Diet Library)",
+        "license": "Public domain (NDL exhibition reproduction policy: all portrait images in public domain)",
+        "license_url": "https://www.ndl.go.jp/portrait/e/about",
+        "query": "Ito Hirobumi NDL portrait 0012_1"
+      },
+      {
+        "entity": "mutsu_munemitsu",
+        "image_url": "https://www.ndl.go.jp/portrait/img/portrait/0199_1.jpg",
+        "source_page": "https://www.ndl.go.jp/portrait/e/datas/199/",
+        "title": "Mutsu, Munemitsu (陸奥宗光, 1844–1897)",
+        "author": "Unknown photographer (not recorded on NDL page)",
+        "date": "Undated historical portrait photograph",
+        "credit": "Portraits of Modern Japanese Historical Figures (National Diet Library)",
+        "license": "Public domain (NDL exhibition reproduction policy: all portrait images in public domain)",
+        "license_url": "https://www.ndl.go.jp/portrait/e/about",
+        "query": "Mutsu Munemitsu NDL portrait 0199_1"
+      }
+    ]
+  },
+  "reproduction": {
+    "adapter": "examples/prepare-li-hongzhang.py --work-dir WORKDIR",
+    "steps": "python3 examples/prepare-li-hongzhang.py --work-dir WORKDIR; python3 skills/book-illustrator/scripts/find_images.py WORKDIR; python3 skills/book-illustrator/scripts/export.py WORKDIR --out WORKDIR/li-hongzhang_illustrated.epub; python3 skills/book-illustrator/scripts/verify.py WORKDIR/original.epub WORKDIR/li-hongzhang_illustrated.epub; python3 examples/render-comparison.py --manifest examples/demos/li-hongzhang.json --work-dir <scratch root> --name li-hongzhang",
+    "picks_note": "pick file names are <source>_<sha256[:12]> of the downloaded bytes; if source serves different bytes, set pick to the new file in candidates/<id>/",
+    "verify_result": "OK: 4 inserted blocks; original files byte-identical outside them (3 inline figures + image-credits section)",
+    "candidate_sha256": {
+      "li_hongzhang": "254b4ef78233ee978127f19a9d4e8e9b10e126dce63e848361a18889344953fa",
+      "ito_hirobumi": "ebe16fb93079df6c1e3ab8de201ee4b21cac35cff288483982a9c595bf75d228",
+      "mutsu_munemitsu": "8adba90b20dbb8d973ae82c73d6186c5bf2ea6e0e825bccd0038eb0e082cd5c6"
+    }
+  },
+  "asset_license_notice": "docs/assets/LICENSE.md"
+}

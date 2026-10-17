@@ -8,7 +8,7 @@
 
 <p align="center">
 <a href="#效果">效果</a> ·
-<a href="#快速开始">快速开始</a> ·
+<a href="#在-agent-中使用">在 Agent 中使用</a> ·
 <a href="#安装">安装</a> ·
 <a href="#运行要求">运行要求</a> ·
 <a href="#格式支持">格式支持</a> ·
@@ -18,16 +18,16 @@
 
 ## 效果
 
-每张图把**同一段摘录**并排展示：左边是原书，右边是本 Skill 实际生成的结果。文字完全相同，唯一的变化是在段落之后插入了带图注的图片。
+每张图把**同样几段摘录**并排展示：左边是原书，右边是本 Skill 实际生成的结果。每一行是一段摘录，文字完全相同，唯一的变化是在段落之后插入了带图注的照片；所选段落之间的原文已省略。
 
 <p align="center">
-<img src="docs/assets/sanguo-before-after.webp" alt="《三国演义》：古典原文与配图后的真实摘录对比" width="100%">
-<br><sub>罗贯中《三国演义》，Project Gutenberg #23950 古典原文。配图为樱井雪馆（1715–1790）历史绘画，经 Wikimedia Commons / 菲尔德博物馆提供；公有领域复制图，已缩放和重新编码。</sub>
+<img src="docs/assets/li-hongzhang-before-after.webp" alt="中文摘录与插入李鸿章、伊藤博文、陆奥宗光照片后的同一摘录对比" width="100%">
+<br><sub>梁启超《李鸿章传》第八章摘录。照片：李鸿章、伊藤博文、陆奥宗光。</sub>
 </p>
 
 <p align="center">
-<img src="docs/assets/beagle-before-after.webp" alt="The Voyage of the Beagle：原文摘录与插图后摘录对比" width="100%">
-<br><sub>Charles Darwin, <i>The Voyage of the Beagle</i>（《小猎犬号航海记》），Project Gutenberg 电子书 #944。照片：Bernard Gagnon，CC BY-SA 4.0；已缩放和重新编码。</sub>
+<img src="docs/assets/carnegie-before-after.webp" alt="《卡内基自传》：三段英文原文与插入安德鲁·卡内基、亨利·菲普斯、亨利·克莱·弗里克照片后的对比" width="100%">
+<br><sub><i>Autobiography of Andrew Carnegie</i>（《卡内基自传》），Project Gutenberg #17976。照片：安德鲁·卡内基、亨利·菲普斯、亨利·克莱·弗里克，美国国会图书馆藏。</sub>
 </p>
 
 [素材出处、署名与复现方法](examples/README.md)。
@@ -41,13 +41,30 @@
 
 两种形式可以都要，也可以只要一种。Agent 会先问两个偏好问题（插图放在哪里、配图范围多大），再给你看候选图预览供挑选，并先做一章样章，确认后再做全书。
 
-## 快速开始
+## 在 Agent 中使用
 
-[安装](#安装)后，对 Agent 说：
+1. **安装**：用下方[安装](#安装)里的一条命令装好 Skill。
+2. **重启 Agent**（或新开一个会话），让它加载新装的 Skill。
+3. **把书交给它**：直接附上文件，或粘贴书的绝对路径，例如 `/Users/me/Books/李鸿章传.epub`。
+4. **粘贴一段提示词**：写明使用 book-illustrator、处理哪几章、主要配哪些人物、插在正文里还是做章末图集、先做样章、不要改动原文件。
+5. **看样章**：Agent 会给出候选图预览（contact sheet）供你挑选，确认后再让它继续。
 
-> 给这本书配插图：~/Books/三国演义.epub
+完整的首次提示词示例：
 
-如果你的 Agent 不会自动选用 Skill，可以说"用 book-illustrator skill 给……配插图"。插图版写在单独的工作目录里，原文件只读不改。
+> 用 book-illustrator skill 处理 /Users/me/Books/李鸿章传.epub。先做第八章。给主要人物配真实的历史照片：李鸿章、伊藤博文、陆奥宗光。每个人第一次出现的那一段后面插一张带图注的照片，不要章末图集。先做这一章给我看效果，不要改动我的原文件。
+
+看完样章后的追问示例：
+
+> 图太多了：只保留后文还会反复出现的人物，每章最多五张。
+
+> 效果可以。按同样方式做完全书，另外再导出一份 DOCX。
+
+你会得到（放在单独的工作目录里，Agent 会告诉你路径）：
+
+- 一份插图版：EPUB、HTML、Markdown 输出与原书相同的格式；TXT、DOCX、MOBI、AZW3、PDF 默认输出插图版 EPUB，需要时可另外导出其他[支持的格式](#格式支持)；
+- 原文件，未作任何改动；
+- 书末的图片来源一节，以及 `配图清单.md`：逐张列出图片的出处、许可和插入位置；
+- 一份简短报告：插了多少张图，哪些人物没找到可靠的照片。
 
 ## 安装
 

@@ -8,7 +8,7 @@ English · <a href="README.zh-CN.md">简体中文</a>
 
 <p align="center">
 <a href="#see-it">See it</a> ·
-<a href="#quick-start">Quick start</a> ·
+<a href="#use-it-with-your-agent">Use it with your agent</a> ·
 <a href="#install">Install</a> ·
 <a href="#requirements">Requirements</a> ·
 <a href="#formats">Formats</a> ·
@@ -18,16 +18,16 @@ English · <a href="README.zh-CN.md">简体中文</a>
 
 ## See it
 
-Each image shows the **same excerpt** twice: the original book on the left, the skill's actual output on the right. The text is identical; the only change is figures with captions inserted after paragraphs.
+Each image shows the **same passages** twice: the original book on the left, the skill's actual output on the right. Each row is one passage; the text is identical, and the only change is captioned photos inserted after paragraphs. Text between the selected passages is omitted.
 
 <p align="center">
-<img src="docs/assets/beagle-before-after.webp" alt="The Voyage of the Beagle: original excerpt beside the same excerpt with photos inserted after paragraphs" width="100%">
-<br><sub>Charles Darwin, <i>The Voyage of the Beagle</i> — Project Gutenberg #944. Photo: Bernard Gagnon, CC BY-SA 4.0; resized and re-encoded.</sub>
+<img src="docs/assets/carnegie-before-after.webp" alt="Autobiography of Andrew Carnegie: three original passages beside the same passages with photos of Andrew Carnegie, Henry Phipps and Henry Clay Frick inserted" width="100%">
+<br><sub><i>Autobiography of Andrew Carnegie</i> — Project Gutenberg #17976. Photos of Andrew Carnegie, Henry Phipps and Henry Clay Frick: Library of Congress.</sub>
 </p>
 
 <p align="center">
-<img src="docs/assets/sanguo-before-after.webp" alt="Romance of the Three Kingdoms: original classical Chinese excerpt beside the illustrated excerpt" width="100%">
-<br><sub>Luo Guanzhong, <i>Romance of the Three Kingdoms</i> — Project Gutenberg #23950. Historical painting by Sakurai Sekkan (1715–1790), via Wikimedia Commons / The Field Museum; public-domain reproduction, resized and re-encoded.</sub>
+<img src="docs/assets/li-hongzhang-before-after.webp" alt="Chinese excerpts beside the same excerpts with photos of Li Hongzhang, Itō Hirobumi and Mutsu Munemitsu inserted" width="100%">
+<br><sub>Liang Qichao, <i>Li Hongzhang</i> (梁启超《李鸿章传》), Chapter 8. Photos of Li Hongzhang, Itō Hirobumi and Mutsu Munemitsu.</sub>
 </p>
 
 [Sources, credits and reproduction](examples/README.md).
@@ -41,13 +41,30 @@ Biographies, business histories and travel or natural-history books introduce do
 
 Use either or both. The agent asks two preference questions (where to place figures, how many entities to cover), shows you contact sheets to pick from, and does a sample chapter before the whole book.
 
-## Quick start
+## Use it with your agent
 
-After [installing](#install), open your agent and say:
+1. **Install** the skill with the one-line command under [Install](#install).
+2. **Restart your agent** (or open a new session) so it picks up the new skill.
+3. **Give it the book**: attach the file, or paste its absolute path, such as `/Users/me/Books/Autobiography-of-Andrew-Carnegie.epub`.
+4. **Paste a prompt** that names the skill and says what you want: which chapters, which people, figures in the text or a gallery per chapter, a sample first, and the original left untouched.
+5. **Review the sample.** The agent shows contact sheets of candidate images; you choose, then tell it to continue.
 
-> Illustrate this book with real photos: ~/Books/The-Voyage-of-the-Beagle.epub
+A complete first prompt:
 
-If your agent does not pick skills automatically, start with "Use the book-illustrator skill to …". The illustrated copy is written to a separate work folder; your original file is only read.
+> Use the book-illustrator skill on /Users/me/Books/Autobiography-of-Andrew-Carnegie.epub. Start with Chapters I–XVI. Illustrate the main people — Andrew Carnegie, Henry Phipps, Henry Clay Frick and Carnegie's other partners — with real archival photos. Put a captioned photo after the paragraph where each person first appears; no chapter galleries. Do one sample chapter first and show me the result. Don't modify my original file.
+
+Follow-ups after the sample:
+
+> Fewer pictures: only people who come up again later, at most five per chapter.
+
+> Looks good. Do the whole book the same way and also give me a DOCX copy.
+
+What you get, in a separate work folder (the agent tells you the path):
+
+- an illustrated copy of the book: the same format for EPUB, HTML and Markdown; an illustrated EPUB for TXT, DOCX, MOBI, AZW3 and PDF. Other [supported formats](#formats) on request;
+- your original file, unchanged;
+- an image-credits section at the end of the book, and `配图清单.md` listing each picture with its source, license and placement;
+- a short report of figures added and people for whom no reliable photo was found.
 
 ## Install
 

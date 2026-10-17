@@ -1,257 +1,82 @@
-# Book Illustrator Examples & Before/After Demos
+# Reading comparisons
 
-This directory contains reproduction tools, metadata manifests, and attribution records for the demonstration comparison assets used in the project documentation.
+The README shows three selected passages and three real portrait photographs from each book. These are outputs of the illustration pipeline, not mock-ups. Separate passages are labelled; omitted text is marked between rows. Each displayed paragraph is shown whole, and original/illustrated text is checked before rendering.
 
-## Demo Overview
+| Demo | Text | Photographs |
+|---|---|---|
+| [李鸿章传](demos/li-hongzhang.json) | 梁启超，1901；第八章三个选段 | 李鸿章、伊藤博文、陆奥宗光 |
+| [Autobiography of Andrew Carnegie](demos/carnegie.json) | Andrew Carnegie, edited by John C. Van Dyke, 1920; Chapters I, XIII, XVI | Andrew Carnegie, Henry Phipps, Henry Clay Frick |
 
-| Demo | Work | Excerpt Scope | Illustration Subject | Source & License |
-| :--- | :--- | :--- | :--- | :--- |
-| **Sanguo** | *三國志演義 / 三國演義* (羅貫中) | Ch. 1, §宴桃園豪傑三結義 (p00026, 254 chars) | 桃園三結義 · 劉備、關羽、張飛 | **Sakurai Sekkan (櫻井雪館)**, The Field Museum, Public domain (PD-Art / PD-old-100) |
-| **Beagle** | *The Voyage of the Beagle* (Charles Darwin) | Ch. XVII, Galapagos Archipelago (p00728, 229 words) | Galápagos Giant Tortoise (*Chelonoidis vicina*) | **Bernard Gagnon**, Charles Darwin Research Station, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+The Chinese example is a working EPUB made from the original chapter body on [Wikisource, pinned revision 2489933](https://zh.wikisource.org/w/index.php?title=李鴻章傳/08&oldid=2489933). It excludes website navigation and adds a chapter heading. It is not a modern annotated edition. The English example uses the [Project Gutenberg #17976 EPUB without images](https://www.gutenberg.org/ebooks/17976). Only comparison images, scripts and metadata are shipped; source books, downloaded portraits and extracted chapter files stay outside the repository.
 
-The rendered side-by-side comparison images live in `docs/assets/`:
-- `docs/assets/sanguo-before-after.webp` (1240 × 842 px, ~92 KB)
-- `docs/assets/beagle-before-after.webp` (1240 × 1104 px, ~148 KB)
+## Sources and image changes
 
----
+Complete source URLs, dates, captions, crops, paragraph selections and reproduction configuration are in the linked per-book JSON files. The combined [demo-manifest.json](demo-manifest.json) is the renderer input. [Asset rights and attribution](../docs/assets/LICENSE.md) cover the comparison images.
 
-## Attribution & Rights
+- **Li Hongzhang:** Russell & Sons, 1896; reproduced in Mrs Archibald Little, *Li Hung Chang: His Life and Times* (1903). [Commons source](https://commons.wikimedia.org/wiki/File:Li_Hung_Chang_in_1896.jpg), marked PD-US.
+- **Ito Hirobumi:** [National Diet Library portrait 12](https://www.ndl.go.jp/portrait/e/datas/12/).
+- **Mutsu Munemitsu:** [National Diet Library portrait 199](https://www.ndl.go.jp/portrait/e/datas/199/). Both NDL portraits are photographs, with no capture date or photographer recorded on their catalog pages. Source: **Portraits of Modern Japanese Historical Figures, National Diet Library**. The [exhibition reuse policy](https://www.ndl.go.jp/portrait/e/about) states that its portrait images are public domain and requires a source credit.
+- **Andrew Carnegie:** Frances Benjamin Johnston, c. 1905. [Library of Congress, LC-USZ62-88699](https://www.loc.gov/pictures/item/2001704108/), Frances Benjamin Johnston Collection. Catalog: “No known restrictions on reproduction.”
+- **Henry Phipps:** Bain News Service (publisher), undated. [Library of Congress, LC-DIG-ggbain-06856](https://www.loc.gov/pictures/item/2014686848/), George Grantham Bain Collection.
+- **Henry Clay Frick:** Bain News Service (publisher), between ca. 1915 and ca. 1920. [Library of Congress, LC-DIG-ggbain-29798](https://www.loc.gov/pictures/item/2014709956/), George Grantham Bain Collection. Both Bain records: “No known restrictions on publication”; [collection rights statement](https://www.loc.gov/rr/print/res/274_bain.html).
 
-Both demonstration works use texts and visual materials that are public domain or openly licensed. See [asset licenses and release status](../docs/assets/LICENSE.md). The Beagle comparison contributions and photograph are explicitly covered by CC BY-SA 4.0; public-domain texts remain public domain. The Sanguo comparison layout is contributed under CC BY 4.0; underlying public-domain text and historical artwork remain public domain.
+Photographs are resized and re-encoded for the illustrated EPUBs. Phipps and Frick are cropped to remove negative borders and labels; any additional crops are recorded in the manifests. These portraits illustrate the people mentioned; their capture dates do not necessarily match the events in each passage.
 
-The illustrations are resized and re-encoded for the illustrated EPUBs and reading comparisons. Their original credits and licenses are recorded below.
+## Reproduce
 
-### 1. Sanguo Case (*三國志演義*)
-
-- **Source Text**:
-  - **Work**: 《三國志演義》 / 《三國演義》
-  - **Author**: 羅貫中 (Luo Guanzhong, c. 1330–1400)
-  - **Source Edition**: Project Gutenberg EBook #23950 ([https://www.gutenberg.org/ebooks/23950](https://www.gutenberg.org/ebooks/23950)), produced by Jian-Lun Huang.
-  - **Status & Rights**: Public domain in the USA per Project Gutenberg catalog page. Classical Chinese original text with no modern commentary or annotations. Full source e-books and complete extracted texts remain scratch and are not bundled in this repository.
-  - **Excerpt Scope**: Chapter 1 section "宴桃園豪傑三結義，斬黃巾英雄首立功" (paragraph `p00026`; 254 characters describing the peach garden oath of Liu Bei, Guan Yu, and Zhang Fei).
-- **Illustration**:
-  - **Subject**: Three Brothers (Liu Bei, Guan Yu, Zhang Fei) / 桃園三結義
-  - **Artist / Repository**: Sakurai Sekkan (櫻井雪館 / 桜井雪館, 1715–1790), Japanese Edo-period painter; collection of The Field Museum of Natural History.
-  - **Source Page**: [Wikimedia Commons File:Three_Brothers_(Bei,_Yu,_Fei).jpg](https://commons.wikimedia.org/wiki/File:Three_Brothers_(Bei,_Yu,_Fei).jpg)
-  - **Image URL**: `https://upload.wikimedia.org/wikipedia/commons/9/91/Three_Brothers_%28Bei%2C_Yu%2C_Fei%29.jpg`
-  - **Date**: Undated on the source page; attributed artist lived 1715–1790 (Edo period)
-  - **License**: Public domain (PD-Art / PD-old-100; faithful photographic reproduction PD in USA; terms may differ in other jurisdictions).
-  - **Verbatim Credit**: The Field Museum
-  - **Caption in Book**: `桃園三結義 · 劉備、關羽、張飛` / `櫻井雪館（1715—1790）繪絹本畫作 · 菲爾德自然史博物館藏（歷史畫作）` (explicitly labeled as a historical artistic depiction, not a contemporaneous photograph).
-
-### 2. Beagle Case (*The Voyage of the Beagle*)
-
-- **Source Text**:
-  - **Work**: *The Voyage of the Beagle* (Journal of Researches into the Natural History and Geology of the Countries Visited During the Voyage of H.M.S. Beagle Round the World)
-  - **Author**: Charles Darwin
-  - **Source Edition**: Project Gutenberg EBook #944 ([https://www.gutenberg.org/ebooks/944](https://www.gutenberg.org/ebooks/944))
-  - **Status & Rights**: Public domain in the USA per Project Gutenberg catalog page.
-  - **Excerpt Scope**: Chapter XVII — Galapagos Archipelago, paragraph `p00728` (229 words, 1284 characters describing the habits and anatomy of *Testudo nigra*).
-- **Illustration**:
-  - **Subject**: Galápagos Giant Tortoise (*Chelonoidis vicina*)
-  - **Photographer**: Bernard Gagnon
-  - **Source Page**: [Wikimedia Commons File:Chelonoidis vicina 04.jpg](https://commons.wikimedia.org/wiki/File:Chelonoidis_vicina_04.jpg)
-  - **Image URL**: `https://upload.wikimedia.org/wikipedia/commons/c/cf/Chelonoidis_vicina_04.jpg`
-  - **Date**: 2014-12-07
-  - **Location**: Charles Darwin Research Station, Santa Cruz Island, Galápagos National Park, Ecuador
-  - **License**: [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/)
-  - **Caption in Book**: `Galápagos Giant Tortoise · Chelonoidis vicina` / `Modern reference photo (Bernard Gagnon, 2014)` (explicitly labeled as a modern reference photo so there is no implied voyage-era photography).
-
----
-
-## Machine-Readable Metadata
-
-The configuration and provenance for each demo are declared in [`demo-manifest.json`](demo-manifest.json):
-- Book titles and subtitles
-- Language codes (`zh` / `en`)
-- Paragraph IDs (`pids`) identifying excerpt boundaries
-- Relative paths for input EPUBs, illustrated EPUBs, and `book.json` indices
-- Complete rights statements, image URLs, author credits, and license links
-
----
-
-## Complete End-to-End Reproduction Workflow
-
-All scratch books, downloaded images, and build artifacts are kept outside the repository in a user-chosen working directory (e.g. `WORKDIR=~/work/demos`).
-
-### Step 1: Initialize Scratch Workspaces and Obtain Input EPUBs
+Run from the repository root using Python with the [skill dependencies](../skills/book-illustrator/requirements.txt) installed. Calibre is required to build the Chinese source EPUB; Chrome/Chromium is needed only for the final comparison screenshots. Use an absolute scratch directory **outside this repository**.
 
 ```bash
-# Set your scratch working directory
-WORKDIR="/path/to/your/scratch/demos"
-mkdir -p "$WORKDIR/beagle" "$WORKDIR/sanguo"
-
-# 1. Charles Darwin - Voyage of the Beagle (Project Gutenberg #944)
-curl -L -o "$WORKDIR/beagle/original.epub" "https://www.gutenberg.org/ebooks/944.epub.noimages"
-python3 skills/book-illustrator/scripts/prepare.py "$WORKDIR/beagle/original.epub" "$WORKDIR/beagle"
-
-# 2. Luo Guanzhong - Romance of the Three Kingdoms (Project Gutenberg #23950)
-curl -L -o "$WORKDIR/sanguo/original.epub" "https://www.gutenberg.org/ebooks/23950.epub.noimages"
-python3 skills/book-illustrator/scripts/prepare.py "$WORKDIR/sanguo/original.epub" "$WORKDIR/sanguo"
+WORKDIR="/absolute/path/to/scratch/book-demos"
+mkdir -p "$WORKDIR/carnegie/dl"
+curl --fail --location \
+  https://www.gutenberg.org/ebooks/17976.epub.noimages \
+  --output "$WORKDIR/carnegie/dl/original.epub"
+python3 skills/book-illustrator/scripts/prepare.py \
+  "$WORKDIR/carnegie/dl/original.epub" "$WORKDIR/carnegie/job"
+python3 examples/prepare-li-hongzhang.py \
+  --work-dir "$WORKDIR/li-hongzhang"
 ```
 
-### Step 2: Configure Demo Entities & Source Manifests
+The Chinese adapter fetches and validates the pinned Wikisource API revision, builds the working EPUB with Calibre, and indexes it. To supply a custom converter path, add `--calibre /path/to/ebook-convert`.
 
-Write the following ready-to-copy configurations to the respective book folders:
-
-#### Beagle Configuration
-
-`$WORKDIR/beagle/image_manifest.json`:
-```json
-{
-  "version": 1,
-  "candidates": [
-    {
-      "entity": "galapagos_tortoise",
-      "image_url": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Chelonoidis_vicina_04.jpg",
-      "source_page": "https://commons.wikimedia.org/wiki/File:Chelonoidis_vicina_04.jpg",
-      "title": "File:Chelonoidis vicina 04.jpg",
-      "author": "Bernard Gagnon",
-      "date": "2014-12-07",
-      "license": "CC BY-SA 4.0",
-      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
-      "query": "Galapagos giant tortoise"
-    }
-  ]
-}
-```
-
-`$WORKDIR/beagle/entities.json`:
-```json
-{
-  "book": "The Voyage of the Beagle",
-  "settings": {
-    "inline": true,
-    "gallery": false,
-    "gallery_title": "Chapter gallery",
-    "sources": ["manifest"],
-    "scope": [19, 19]
-  },
-  "entities": [
-    {
-      "id": "galapagos_tortoise",
-      "name": "Galápagos Giant Tortoise",
-      "type": "animal",
-      "at": "p00728",
-      "match": ["Testudo nigra"],
-      "role": "Chelonoidis vicina",
-      "caption": "Galápagos Giant Tortoise · Chelonoidis vicina",
-      "note": "Modern reference photo (Bernard Gagnon, 2014)"
-    }
-  ]
-}
-```
-
-#### Sanguo Configuration
-
-`$WORKDIR/sanguo/image_manifest.json`:
-```json
-{
-  "version": 1,
-  "candidates": [
-    {
-      "entity": "three_brothers",
-      "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/91/Three_Brothers_%28Bei%2C_Yu%2C_Fei%29.jpg",
-      "source_page": "https://commons.wikimedia.org/wiki/File:Three_Brothers_(Bei,_Yu,_Fei).jpg",
-      "title": "File:Three Brothers (Bei, Yu, Fei).jpg",
-      "author": "Sakurai Sekkan (櫻井雪館, 1715–1790)",
-      "credit": "The Field Museum",
-      "date": "Undated on source page; artist lived 1715–1790",
-      "license": "Public domain (PD-Art / PD-old-100)",
-      "license_url": "https://commons.wikimedia.org/wiki/File:Three_Brothers_(Bei,_Yu,_Fei).jpg",
-      "query": "Three Brothers Bei Yu Fei Sakurai Sekkan"
-    }
-  ]
-}
-```
-
-`$WORKDIR/sanguo/entities.json`:
-```json
-{
-  "book": "三國演義",
-  "settings": {
-    "inline": true,
-    "gallery": false,
-    "sources": ["manifest"],
-    "scope": [0, 0]
-  },
-  "entities": [
-    {
-      "id": "three_brothers",
-      "name": "桃園結義",
-      "type": "event",
-      "at": "p00026",
-      "match": ["桃園", "結為兄弟", "劉備", "關羽", "張飛"],
-      "role": "劉備、關羽、張飛桃園三結義",
-      "caption": "桃園三結義 · 劉備、關羽、張飛",
-      "note": "櫻井雪館（1715—1790）繪絹本畫作 · 菲爾德自然史博物館藏（歷史畫作）"
-    }
-  ]
-}
-```
-
-### Step 3: Fetch Candidates and Set Picks
+Write the ready-made entities and source manifests, download and select the photographs, export, and verify:
 
 ```bash
-# 1. Download and decode candidate images via manifest
-python3 skills/book-illustrator/scripts/find_images.py "$WORKDIR/beagle"
-python3 skills/book-illustrator/scripts/find_images.py "$WORKDIR/sanguo"
+python3 - "$WORKDIR" <<'PYTHON'
+import json
+import subprocess
+import sys
+from pathlib import Path
 
-# 2. Select the downloaded candidate filename recorded in SOURCE.json into entities.json "pick"
-python3 -c '
-import json, os, sys
-for slug in ["beagle", "sanguo"]:
-    work = os.path.join(sys.argv[1], slug)
-    ent_file = os.path.join(work, "entities.json")
-    with open(ent_file, "r+", encoding="utf-8") as f:
-        data = json.load(f)
-        for e in data.get("entities", []):
-            src_file = os.path.join(work, "candidates", e["id"], "SOURCE.json")
-            if os.path.isfile(src_file):
-                src_data = json.load(open(src_file, encoding="utf-8"))
-                if src_data:
-                    e["pick"] = src_data[0]["file"]
-        f.seek(0); f.truncate(); json.dump(data, f, indent=2, ensure_ascii=False)
-' "$WORKDIR"
-```
+root = Path(sys.argv[1]).resolve()
+scripts = Path("skills/book-illustrator/scripts")
+for name in ("li-hongzhang", "carnegie"):
+    demo = json.loads(Path(f"examples/demos/{name}.json").read_text())
+    paths = {k: root / v for k, v in demo["relative_paths"].items()}
+    job = paths["book_json"].parent
+    entities = demo["entities"]
+    for filename, value in (("entities.json", entities),
+                            ("image_manifest.json", demo["image_manifest"])):
+        (job / filename).write_text(json.dumps(value, ensure_ascii=False, indent=2))
+    def run(script, *args):
+        subprocess.run([sys.executable, str(scripts / script),
+                        *map(str, args)], check=True)
+    run("find_images.py", job)
+    for entity in entities["entities"]:
+        records = json.loads((job / "candidates" / entity["id"] / "SOURCE.json").read_text())
+        if not records:
+            raise RuntimeError(f"No downloaded photograph for {entity['id']}")
+        entity["pick"] = records[0]["file"]
+    (job / "entities.json").write_text(json.dumps(entities, ensure_ascii=False, indent=2))
+    run("export.py", job, "--out", paths["illus_epub"])
+    run("verify.py", paths["orig_epub"], paths["illus_epub"])
+PYTHON
 
-### Step 4: Export and Byte-Verify
-
-```bash
-# Export illustrated editions (credits: true by default appends an in-book image source section)
-python3 skills/book-illustrator/scripts/export.py "$WORKDIR/beagle" --out "$WORKDIR/beagle/beagle_illustrated.epub"
-python3 skills/book-illustrator/scripts/export.py "$WORKDIR/sanguo" --out "$WORKDIR/sanguo/sanguo_illustrated.epub"
-
-# Verify byte identity: proves native original text is 100% byte-identical outside <!--illus:...--> blocks
-python3 skills/book-illustrator/scripts/verify.py "$WORKDIR/beagle/original.epub" "$WORKDIR/beagle/beagle_illustrated.epub"
-python3 skills/book-illustrator/scripts/verify.py "$WORKDIR/sanguo/original.epub" "$WORKDIR/sanguo/sanguo_illustrated.epub"
-```
-
-Both verify checks will output:
-```
-OK: 2 inserted blocks; original files byte-identical outside them
-```
-(Corresponding to 1 inline figure block and 1 in-book image sources credit block; original text is byte-identical outside these inserted blocks).
-
-### Step 5: Render Visual Comparison Assets
-
-```bash
-# Render all demos declared in examples/demo-manifest.json
 python3 examples/render-comparison.py \
-  --manifest examples/demo-manifest.json \
-  --work-dir "$WORKDIR" \
-  --all
+  --manifest examples/demo-manifest.json --work-dir "$WORKDIR" --all
 ```
 
-Outputs:
-- `docs/assets/sanguo-before-after.webp`
-- `docs/assets/beagle-before-after.webp`
+Each book should report **4 inserted blocks**: three inline photographs and one image-credit section, with original files byte-identical outside them. This comparison is against the prepared EPUB; for the Chinese sample it does not compare EPUB bytes with web HTML. The renderer independently checks each selected passage, resolves pictures from the exported EPUB, and produces `docs/assets/li-hongzhang-before-after.webp` and `docs/assets/carnegie-before-after.webp`.
 
-> **Notes on Environment & Editions**:
-> 1. **Chrome Requirement**: Headless Google Chrome or Chromium is required only to re-render the screenshot comparisons in Step 5 (`render-comparison.py`). The core pipeline (`prepare.py`, `find_images.py`, `export.py`, `verify.py`) runs on pure Python without Chrome.
-> 2. **Paragraph IDs**: The paragraph IDs (`p00026` and `p00728`) are determined by `prepare.py` during extraction. If a different edition or variation of an EPUB is used, inspect `book.json` and adjust the IDs accordingly.
-> 3. **Truthfulness Guarantee**: `render-comparison.py` asserts that stripped illustrated text matches original text byte-for-byte before inlining images:
->    ```python
->    stripped = BLOCK_RE.sub("", illus_frag)
->    assert stripped == orig_frag, "Stripped illustrated excerpt must strictly match original excerpt"
->    ```
+The manifests record the tested source edition and candidate hashes. Upstream EPUB revisions can change paragraph IDs: inspect `book.json` and update the selection if necessary. Changed image bytes produce new candidate filenames; the reproduction snippet selects the downloaded candidate from `SOURCE.json`. Review downloaded portraits before using a changed upstream source.
