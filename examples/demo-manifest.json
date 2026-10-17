@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "demos": {
+    "sanguo": {
+      "book_id": "sanguo",
+      "title": "三國志演義",
+      "subtitle": "第一回：宴桃園豪傑三結義 · 羅貫中",
+      "meta_tag": "古典名著閱讀樣張對比 · PROJECT GUTENBERG #23950",
+      "lang": "zh",
+      "label_orig": "原文 (Original)",
+      "label_illus": "配圖後 (Illustrated)",
+      "pids": [
+        "p00026"
+      ],
+      "relative_paths": {
+        "orig_epub": "sanguo/original.epub",
+        "illus_epub": "sanguo/sanguo_illustrated.epub",
+        "book_json": "sanguo/book.json"
+      },
+      "output": "docs/assets/sanguo-before-after.webp",
+      "width": 1240,
+      "quality": 90,
+      "source_excerpt": {
+        "book": "三國志演義",
+        "author": "羅貫中 (Luo Guanzhong)",
+        "edition": "Project Gutenberg EBook #23950 (produced by Jian-Lun Huang)",
+        "source_url": "https://www.gutenberg.org/ebooks/23950",
+        "chapter": "第一回：宴桃園豪傑三結義，斬黃巾英雄首立功",
+        "paragraphs_in_excerpt": 1,
+        "body_pids": [
+          "p00026"
+        ],
+        "characters_count": 254,
+        "rights": "Public domain in the USA per Project Gutenberg catalog page. Classical Chinese text; no modern translation or annotations added by this project."
+      },
+      "illustrations": [
+        {
+          "entity": "three_brothers",
+          "subject": "Three Brothers (Liu Bei, Guan Yu, Zhang Fei) / 桃園三結義",
+          "caption": "桃園三結義 · 劉備、關羽、張飛",
+          "note": "櫻井雪館（1715—1790）繪絹本畫作 · 菲爾德自然史博物館藏（歷史畫作）",
+          "source_page": "https://commons.wikimedia.org/wiki/File:Three_Brothers_(Bei,_Yu,_Fei).jpg",
+          "image_url": "https://upload.wikimedia.org/wikipedia/commons/9/91/Three_Brothers_%28Bei%2C_Yu%2C_Fei%29.jpg",
+          "author": "Sakurai Sekkan (櫻井雪館 / 桜井雪館, 1715–1790)",
+          "credit": "The Field Museum",
+          "date": "Undated on source page; artist lived 1715–1790",
+          "license": "Public domain (PD-Art / PD-old-100; faithful photographic reproduction PD in USA)",
+          "license_url": "https://commons.wikimedia.org/wiki/File:Three_Brothers_(Bei,_Yu,_Fei).jpg"
+        }
+      ],
+      "asset_license_notice": "docs/assets/LICENSE.md; project comparison contributions CC BY 4.0; public-domain text and artwork excluded"
+    },
+    "beagle": {
+      "book_id": "beagle",
+      "title": "The Voyage of the Beagle",
+      "subtitle": "Chapter XVII: Galapagos Archipelago · Charles Darwin",
+      "meta_tag": "READING EXCERPT COMPARISON · PROJECT GUTENBERG #944",
+      "lang": "en",
+      "label_orig": "Original",
+      "label_illus": "Illustrated",
+      "pids": [
+        "p00728"
+      ],
+      "relative_paths": {
+        "orig_epub": "beagle/original.epub",
+        "illus_epub": "beagle/beagle_illustrated.epub",
+        "book_json": "beagle/book.json"
+      },
+      "output": "docs/assets/beagle-before-after.webp",
+      "width": 1240,
+      "quality": 90,
+      "source_excerpt": {
+        "book": "The Voyage of the Beagle",
+        "author": "Charles Darwin",
+        "edition": "Project Gutenberg EBook #944",
+        "source_url": "https://www.gutenberg.org/ebooks/944",
+        "chapter": "CHAPTER XVII — GALAPAGOS ARCHIPELAGO",
+        "paragraphs_in_excerpt": 1,
+        "body_pids": [
+          "p00728"
+        ],
+        "word_count": 229,
+        "characters_count": 1284,
+        "rights": "Public domain in the USA per Project Gutenberg catalog page."
+      },
+      "illustrations": [
+        {
+          "entity": "galapagos_tortoise",
+          "subject": "Galápagos Giant Tortoise (Chelonoidis vicina)",
+          "caption": "Galápagos Giant Tortoise · Chelonoidis vicina",
+          "note": "Modern reference photo (Bernard Gagnon, 2014)",
+          "source_page": "https://commons.wikimedia.org/wiki/File:Chelonoidis_vicina_04.jpg",
+          "image_url": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Chelonoidis_vicina_04.jpg",
+          "author": "Bernard Gagnon",
+          "date": "2014-12-07",
+          "location": "Charles Darwin Research Station, Santa Cruz Island, Galápagos National Park, Ecuador",
+          "license": "Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)",
+          "license_url": "https://creativecommons.org/licenses/by-sa/4.0/"
+        }
+      ],
+      "asset_license_notice": "docs/assets/LICENSE.md; project comparison contributions CC BY-SA 4.0; public-domain text excluded"
+    }
+  }
+}

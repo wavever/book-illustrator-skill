@@ -1,109 +1,184 @@
-# epub-illustrate
+<h1 align="center">Book Illustrator</h1>
 
-给电子书配上真实的图片，**不改动原文一个字**。
+<p align="center"><b>An Agent Skill that adds sourced images to a book — after the paragraph where each person, product, place or event first appears — without changing a word of the text.</b></p>
 
-读传记、商业史这类书时，书里每出现一个新人物、新产品，脑子里往往没有画面。这个 Agent Skill 会通读整本 EPUB，找出书中的人物、产品、公司、地点和事件，从网上搜集真实的照片、旧网页存档和产品截图，然后：
+<p align="center">
+English · <a href="README.zh-CN.md">简体中文</a>
+</p>
 
-- **正文插图**：在它们第一次出现的那一段后面插入一张小图，并附图注"名字 · 身份"，第二行可写年份或说明；
-- **章末图集**：每章末尾加一页「本章人物与产品」，集中展示本章出现过的对象。
+<p align="center">
+<a href="#see-it">See it</a> ·
+<a href="#quick-start">Quick start</a> ·
+<a href="#install">Install</a> ·
+<a href="#requirements">Requirements</a> ·
+<a href="#formats">Formats</a> ·
+<a href="#limits">Limits</a> ·
+<a href="#development">Development</a>
+</p>
 
-两种形式可以都要，也可以只要其中一种。
+## See it
 
-[English](#english)
+Each image shows the **same excerpt** twice: the original book on the left, the skill's actual output on the right. The text is identical; the only change is figures with captions inserted after paragraphs.
 
-## 安装
+<p align="center">
+<img src="docs/assets/beagle-before-after.webp" alt="The Voyage of the Beagle: original excerpt beside the same excerpt with photos inserted after paragraphs" width="100%">
+<br><sub>Charles Darwin, <i>The Voyage of the Beagle</i> — Project Gutenberg #944. Photo: Bernard Gagnon, CC BY-SA 4.0; resized and re-encoded.</sub>
+</p>
+
+<p align="center">
+<img src="docs/assets/sanguo-before-after.webp" alt="Romance of the Three Kingdoms: original classical Chinese excerpt beside the illustrated excerpt" width="100%">
+<br><sub>Luo Guanzhong, <i>Romance of the Three Kingdoms</i> — Project Gutenberg #23950. Historical painting by Sakurai Sekkan (1715–1790), via Wikimedia Commons / The Field Museum; public-domain reproduction, resized and re-encoded.</sub>
+</p>
+
+[Sources, credits and reproduction](examples/README.md).
+
+## What it does
+
+Biographies, business histories and travel or natural-history books introduce dozens of people, products, companies and places you have never seen. Book Illustrator lets your coding agent read the whole book, list those entities, gather real photographs, archived web pages and product screenshots for them, and build an illustrated edition with:
+
+- **Inline figures** — a small captioned figure after the paragraph where an entity first appears (`Name · role`, optional second line such as a year or "modern photo").
+- **Chapter galleries** — an end-of-chapter page collecting everything that chapter introduced.
+
+Use either or both. The agent asks two preference questions (where to place figures, how many entities to cover), shows you contact sheets to pick from, and does a sample chapter before the whole book.
+
+## Quick start
+
+After [installing](#install), open your agent and say:
+
+> Illustrate this book with real photos: ~/Books/The-Voyage-of-the-Beagle.epub
+
+If your agent does not pick skills automatically, start with "Use the book-illustrator skill to …". The illustrated copy is written to a separate work folder; your original file is only read.
+
+## Install
+
+Install with the [Skills CLI](https://github.com/vercel-labs/skills):
 
 ```bash
-npx skills add wavever/epub-illustrate
+npx skills add wavever/book-illustrator-skill
 ```
 
-支持 Claude Code 等兼容 [Agent Skills](https://skills.sh/) 的工具。只装到当前用户：`npx skills add wavever/epub-illustrate -g`。
+Choose your agents when prompted. The default installation is project-local; add `-g` to make the skill available across projects:
 
-依赖如下：
+```bash
+npx skills add wavever/book-illustrator-skill -g
+```
 
-- **Python 3.9+**：运行 `pip install -r skills/epub-illustrate/requirements.txt`，会装上 Pillow、lxml、certifi。
-- **Google Chrome 或 Chromium**：用于在后台访问百度百科，以及生成预览图。
-- **Java**：用于 epubcheck 格式校验。首次使用时会自动下载 epubcheck 到 `~/.cache/epub-illustrate/`。
+For an unattended install to Claude Code:
 
-## 使用
+```bash
+npx skills add wavever/book-illustrator-skill --skill book-illustrator -a claude-code -g -y
+```
 
-对 Agent 说：
+The installer discovers `book-illustrator` under [`skills/book-illustrator/`](skills/book-illustrator/) and installs its instructions, scripts and requirements together. Node.js/npm is needed for this installer; Python is needed when running the skill. No separate npm package is required.
 
-> 给这本书配插图：~/Books/腾讯传.epub
+From a local checkout, run `npx skills add . --skill book-illustrator`. Use `npx skills add . --list` to preview the available skill.
 
-开始之前，Agent 会先和你确认三件事。每一项都有预设方案，你也可以直接描述自己的方案。
+<details>
+<summary>Manual installation (optional)</summary>
 
-| 问题 | 预设方案 |
-|---|---|
-| 图片怎么找 | **后台检索**（推荐，不占用你的浏览器）/ 使用你的浏览器（多 Bing，可过验证码）/ 只用开放图库（Wikidata、Commons）/ 自定义 |
-| 插图放在哪里 | **正文 + 章末图集** / 只在正文插图 / 只加章末图集 |
-| 配图范围 | **所有新出现的对象** / 只配主要人物和核心产品 / 自定义 |
+Copy the **whole** `skills/book-illustrator/` folder (`SKILL.md`, `requirements.txt`, `scripts/`). From the repository root:
 
-之后的流程：
+```bash
+# Claude Code, available in every project
+mkdir -p ~/.claude/skills && cp -R skills/book-illustrator ~/.claude/skills/
 
-1. 拆书并建立段落索引；
-2. 逐章列出要配图的对象；
-3. 从多个来源搜集候选图；
-4. 拼成预览图挑选；
-5. 生成新书；
-6. 校验。
+# Claude Code, one project only
+mkdir -p /path/to/project/.claude/skills && cp -R skills/book-illustrator /path/to/project/.claude/skills/
+```
 
-先做一章样章给你看，确认后再做全书。
+Windows (PowerShell):
 
-## 图片来源
+```powershell
+New-Item -ItemType Directory -Force $HOME\.claude\skills | Out-Null
+Copy-Item -Recurse skills\book-illustrator $HOME\.claude\skills\
+```
 
-| 来源 | 用途 | 方式 |
+- **Other agents with Agent Skills support**: copy the same folder into the skills directory that agent documents.
+- **Any other agent**: keep the folder anywhere and tell the agent: *"Read /path/to/book-illustrator/SKILL.md and follow it to illustrate ~/Books/my-book.epub."*
+
+</details>
+
+### Python packages
+
+The `npx` command installs the skill files. On first use, the agent checks Python dependencies and creates a virtual environment in the book's work folder when Pillow, lxml or certifi are missing. No manual pip step is normally needed. For optional advance setup, use the skill directory reported by the installer:
+
+```bash
+SKILL_DIR="/absolute/path/to/installed/book-illustrator"
+python3 -m venv ~/.venvs/book-illustrator
+~/.venvs/book-illustrator/bin/python -m pip install -r "$SKILL_DIR/requirements.txt"
+```
+
+From a repository checkout at its root, the requirements file is `skills/book-illustrator/requirements.txt`; from inside the installed skill folder it is `requirements.txt`. Tell your agent which Python to use (for example, "use ~/.venvs/book-illustrator/bin/python").
+
+## Requirements
+
+| Component | Needed for | Required? |
 |---|---|---|
-| 本地文件夹 | 你已有的素材 | 直接复制 |
-| Wikidata / Wikimedia Commons | 外国人物、地点、软件截图 | 公开 API |
-| 百度百科 | 中文人物、公司、产品 | 后台无头 Chrome（独立的临时配置，不碰你的浏览器） |
-| 360 图片搜索 | 老照片、旧版界面、旧网页 | 直接请求 |
-| Bing 图片搜索 | 同上 | 仅在「使用你的浏览器」方案下，通过 ego-browser 调用 |
+| Maintained Python (3.12+ recommended), Pillow, lxml, certifi; compatibility floor 3.9 | Everything | Yes |
+| Network access | Image search (Wikidata, Wikimedia Commons, Openverse) | Yes, unless you supply your own images |
+| [Calibre](https://calibre-ebook.com/download) `ebook-convert` | Importing DOCX/TXT/MOBI/AZW3/PDF; exporting to those formats | Only for those formats |
+| Java 11+ | `epubcheck_diff.py` (reports new EPUB validation errors) | Optional |
+| Google Chrome or Chromium | `preview.py` page renders; opt-in legacy Baidu Baike source | Optional |
+| `markdown-it-py` | `preview.py` renders of Markdown books | Optional |
+| Node.js | `npx skills` installer; opt-in legacy ego-browser mode | Optional |
 
-## 规则与保证
+No browser, login or API key is needed for the default image search. If your agent has its own web search, it can hand the image URLs it finds to the skill, which downloads and checks them like any other source.
 
-- **原文零改动**：插入的内容一律放在原有元素之间，并用 `<!--illus:start-->…<!--illus:end-->` 包起来。`verify.py` 会去掉这些块，逐字节比对原书的每个文件。
-- **格式不变差**：`epubcheck_diff.py` 只报告新增的校验问题。很多市售或转换来的电子书本身就有大量校验错误，这些不算在内。
-- **只用真实图片**：照片、扫描件、截图、网页存档都可以，不使用 AI 生成的图片。
-- **身份核实**：只有至少两个独立来源都对得上同一张脸，才会标注人物姓名。不确定的宁可不配，或者只写确定的内容，比如只写"新浪网的早期标识"，不写画面里的人是谁。
-- **优先年代对应的图**：比如年轻时的创始人、当年的产品界面、旧网站首页。用今天的照片时，会在图注里注明"今貌"。
-- 每本书都会输出一份 `配图清单.md`，列出每张图放在哪一段、图注和来源，以及暂时没配上图的对象。
+## Formats
 
-## 注意
+| Input | How it is handled | What is guaranteed |
+|---|---|---|
+| **EPUB 2/3, HTML/XHTML, Markdown** (native) | The original file is only read. A working copy keeps the original markup; figures are added *between* existing elements, wrapped in `<!--illus:start-->…<!--illus:end-->` | `verify.py` removes those blocks and checks every original file is **byte-identical**. Output has the same format. |
+| **DOCX, TXT, MOBI, AZW3, text-layer PDF** (normalized) | Calibre converts a copy to `normalized.epub`, which becomes the baseline | The original file is never modified, and the illustrated EPUB is byte-verified against `normalized.epub` — **not** against the original. Conversion reflows the layout. |
+| **Export to DOCX, MOBI, AZW3, PDF** | A verified EPUB is converted by Calibre | Layout depends on Calibre; check visually. No byte guarantee. |
 
-- 只支持**没有 DRM** 的 EPUB。遇到 DRM 保护的书，Skill 会停下来，不会尝试解除。
-- 搜集到的图片版权归原作者所有。本工具面向个人阅读，生成的电子书请勿公开传播。使用时请遵守各网站的服务条款。
+Native HTML and Markdown output comes with a `<name>_assets/` folder holding the images.
 
-## 目录结构
+## How it works
 
-```
-skills/epub-illustrate/
-├── SKILL.md            # 给 Agent 的说明：确认方案 → 拆书 → 列对象 → 找图 → 挑图 → 生成 → 校验
-├── requirements.txt
-└── scripts/
-    ├── extract.py      # 解包 EPUB，建立段落索引
-    ├── find_images.py  # 多来源搜集候选图
-    ├── webfetch.py     # 后台 Chrome（百度百科）/ 360 图片搜索
-    ├── baike.mjs, bing.mjs  # 「使用你的浏览器」方案（ego-browser）
-    ├── sheet.py        # 候选图拼成预览图
-    ├── inject.py       # 插入正文插图和章末图集，并重新打包
-    ├── verify.py       # 逐字节验证原文未改
-    ├── epubcheck_diff.py    # 只报告新增的格式问题
-    └── preview.py      # 渲染预览页
-```
+1. `prepare.py` unpacks (or converts) the book and indexes every paragraph.
+2. The agent reads each chapter and writes `entities.json` with the entities to illustrate.
+3. `find_images.py` collects candidates: your local files → an optional `image_manifest.json` from the agent's own search → Wikidata → Wikimedia Commons → Openverse. Every download is size-limited, fully decoded with Pillow and de-duplicated; provenance goes to `SOURCE.json`. Reruns skip sources that already succeeded and retry the ones that failed.
+4. `sheet.py` renders contact sheets with every candidate; you or the agent pick, crop and caption.
+5. `export.py` injects the figures and galleries, runs `verify.py`, and converts if needed.
+6. The book ends with an image-credits section by default: recorded creators, licenses and source pages, plus changes such as resizing or cropping. The work folder also contains `配图清单.md` with placement details, full provenance and missing images.
 
----
+Full agent instructions are in [`SKILL.md`](skills/book-illustrator/SKILL.md).
 
-## English
+## Limits
 
-**epub-illustrate** is an Agent Skill that adds real-photo illustrations to an EPUB without changing a single character of the original text. It finds each new person, product, company, place and event in the book, collects real photos, archived web pages and period screenshots, and inserts a captioned figure after the paragraph where it first appears and/or a per-chapter "people & products" gallery.
+- **Only real images.** Photos, scans, screenshots and web archives; nothing AI-generated.
+- **People are named only when verified.** At least two independent sources must show the same face. Search hits are not verification, and ambiguous names are flagged for you to settle instead of guessing.
+- **Sharing:** check the book and image licenses before distributing an illustrated edition.
+- **No DRM.** Protected books are refused; nothing is decrypted.
+- **PDF needs a text layer.** Scanned image-only PDFs need OCR, which is not supported.
+- **TXT encoding**: UTF-8 and Unicode BOMs are detected; pass `--encoding` for GBK, GB18030, Big5 and similar.
+- **Text and markup are preserved, not the visual layout.** In native formats every original byte outside the illustration blocks stays the same, but the added figures still change pagination and flow. Converted and exported formats are also reflowed by Calibre.
+- **Source availability varies by region.** Wikidata, Commons and Openverse can be slow, rate-limited or blocked; failures are recorded and retried on the next run.
+- **Chinese defaults.** The gallery title (`本章人物与产品`) and chapter pattern default to Chinese books; the agent sets `gallery_title` and `chapter_re` for other languages.
+
+## Development
 
 ```bash
-npx skills add wavever/epub-illustrate
+python3 -m venv .venv
+.venv/bin/python -m pip install -r skills/book-illustrator/requirements.txt
+.venv/bin/python -m unittest discover -s tests -t . -v
 ```
 
-Before starting, the agent asks how to source images, where to place them, and how dense the coverage should be. Each question has presets, and you can also describe your own approach. Every insertion is wrapped in marker comments, and `verify.py` checks that the book is byte-identical once those are removed. Only DRM-free EPUBs are supported. The images belong to their owners, so the tool is meant for personal reading.
+Tests use synthetic books, a mocked network and a stub Chrome, so they run offline. Calibre and Java/epubcheck checks are skipped when those tools are absent. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+```
+skills/book-illustrator/
+├── SKILL.md            # instructions the agent follows
+├── requirements.txt
+└── scripts/            # prepare, find_images, sheet, inject, export, verify, …
+tests/                  # offline unit and integration tests
+docs/assets/            # README demo images (separate rights, see examples/README.md)
+examples/               # demo sources, credits and reproduction notes
+```
 
 ## License
 
-[MIT](LICENSE)
+Code: [MIT](LICENSE) · [Demo credits and licenses](docs/assets/LICENSE.md) · [Privacy and data flow](PRIVACY.md)
+
+<sub>Uses the Openverse API; not endorsed or certified by Openverse. [Source terms](https://github.com/WordPress/openverse/blob/main/documentation/terms_of_service.md).</sub>

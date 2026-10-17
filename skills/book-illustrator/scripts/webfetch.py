@@ -1,8 +1,10 @@
-"""Image lookups that need no user browser.
+"""Legacy, opt-in web lookups (find_images.py sources "baike" / "web"; never part of "auto").
 
-- Baidu Baike and Bing Images reject plain HTTP, so they are rendered with a private headless
+- Baidu Baike and Bing Images reject direct (non-browser) requests, so they are rendered with a private headless
   Chrome (its own throwaway profile; it never touches the user's browser) and parsed with lxml.
-- 360 image search (image.so.com) answers plain HTTP with JSON.
+  Chrome is only looked up when one of these functions is actually called.
+- 360 image search (image.so.com) answers direct HTTPS requests with JSON (unofficial, undocumented
+  endpoint; the site's own terms apply).
 
 Each function returns a list of dicts: {"img": url, "url": page_url, "about": text}.
 """
@@ -60,18 +62,25 @@ def _has_class(part):
     return f"contains(@class,'{part}')"
 
 
-def baike(item, hint=""):
-    url = "https://baike.baidu.com/item/" + urllib.parse.quote(item)
+def baike(item, hint="", url=None):
+    """Legacy (needs Chrome). On a 多义词 page only a sense containing `hint` is followed; otherwise
+    providers.Ambiguous lists the senses so the entity can get "baike_url" or a better "hint"."""
+    explicit = bool(url)
+    url = url or "https://baike.baidu.com/item/" + urllib.parse.quote(item)
     dom = render(url)
     doc = lhtml.fromstring(dom or "<html/>")
-    if doc.xpath("//body//*[not(self::script) and not(self::style)][contains(text(),'多义词')]"):
+    if not explicit and doc.xpath("//body//*[not(self::script) and not(self::style)][contains(text(),'多义词')]"):
         senses = [(a.text_content().strip(), a.get("href")) for a in doc.xpath("//a[contains(@href,'/item/')]")]
         senses = [(t, h) for t, h in senses if t and len(t) < 60]
-        pick = next((s for s in senses if hint and hint in s[0]), senses[0] if senses else None)
-        if pick:
-            url = urllib.parse.urljoin("https://baike.baidu.com", pick[1])
-            dom = render(url)
-            doc = lhtml.fromstring(dom or "<html/>")
+        matches = [s for s in senses if hint and hint in s[0]]
+        if len({h for _, h in matches}) != 1:
+            from providers import Ambiguous
+            opts = [{"text": t, "href": urllib.parse.urljoin("https://baike.baidu.com", h)} for t, h in senses[:10]]
+            raise Ambiguous(f'Baike "{item}" has several senses' + (f' and hint "{hint}" does not pick exactly one'
+                            if hint else '') + '; set "baike_url" on the entity (or a "hint")', opts)
+        url = urllib.parse.urljoin("https://baike.baidu.com", matches[0][1])
+        dom = render(url)
+        doc = lhtml.fromstring(dom or "<html/>")
     title = (doc.xpath("//title/text()") or [""])[0]
     summary = " ".join(" ".join(n.text_content().split()) for n in
                        doc.xpath(f"//*[{_has_class('lemmaSummary')} or {_has_class('lemma-summary')}]"))[:300]

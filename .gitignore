@@ -1,6 +1,28 @@
 __pycache__/
 *.pyc
 .DS_Store
-# per-book working directories and outputs
+
+# virtual environments and tool caches
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# local credentials
+.env
+.env.*
+*.pem
+*.key
+
+# per-book working directories and outputs — never commit books
 books/
+*_插图版*
 *.epub
+*.mobi
+*.azw
+*.azw3
+*.kfx
+*.prc
+*.pdf
+*.docx
