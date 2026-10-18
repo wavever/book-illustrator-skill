@@ -19,7 +19,7 @@ Turns `book.epub` (or `.html`, `.md`, `.docx`, `.txt`, `.mobi`, `.azw3`, `.pdf`)
 
 Image acquisition is automatic and needs no choice from the user: the default `auto` chain uses only Python + network (no browser, Node, login or API key). Do **not** ask the user to pick search infrastructure. Ask only the questions below that the user has not already answered in this conversation (question tool if available, one call; otherwise plain text). Each offers the presets **and** free text; recommended preset first.
 
-If the user volunteers sourcing wishes ("use my folder X", "also use Baidu Baike", "only open-licence images"), map them onto `settings`/entity keys (step 3) without further questions.
+If the user volunteers sourcing wishes ("use my folder X", "also use Baidu Baike", "only open-licence images") or asks for smaller files / specific compression ("compact", "keep under 80KB"), map them onto `settings`/entity keys (steps 2 & 3) without further questions (automatic image compression defaults to `balanced`).
 
 1. **插图放在哪里**
    - **正文首次出现处 + 章末图集（推荐）** → `"inline": true, "gallery": true`
@@ -71,6 +71,11 @@ Fixed rules, not options: real images only (photos, scans, screenshots, web arch
    - `match`: exact strings whose first occurrence places the figure. Avoid short ambiguous strings (e.g. "小马"); use `"at": "p00123"` to force a paragraph.
    - Check the book's own images first (`[已有图片]`) so you don't duplicate them.
    - `hint` (any search language) disambiguates Wikidata; `"qid": "Q…"` pins the entity. Optional per-source query overrides: `"commons": "query"`, `"openverse": "query"`, `false` to skip a source.
+   - **Image compression** (`settings.image_compression`): automatic default `"balanced"`. Presets:
+     - `"compact"`: max 800px, quality 72, target 80 KiB, min quality 50, min side 480px.
+     - `"balanced"`: max 1024px, quality 80, target 120 KiB, min quality 60, min side 640px.
+     - `"high"`: max 1600px, quality 88, target 300 KiB, min quality 70, min side 1024px; quality-first and may be larger than balanced or older releases.
+     Or an object overriding single keys: `{"preset": "balanced", "target_kb": 150, "max_side": 1200}` (`target_kb: null` disables byte budget). Byte targets are best effort: when min quality and size floors are reached first, the smallest encode is kept with `target_met = false`. `min_side` is a floor only (never upscaled). Downloaded originals in `candidates/` are retained untouched.
    - For a whole book, work chapter by chapter in one entities.json, widening `scope`.
 
 3. **Collect candidates**
@@ -96,7 +101,7 @@ Fixed rules, not options: real images only (photos, scans, screenshots, web arch
    - `"pick": "file"` in `candidates/<id>/` (or `["file1", "file2"]` for multi-figure rows);
    - `"caption"`: first caption line (default `"name · role"`);
    - `"note"`: optional second caption line ("1997 年网页存档", "今貌", "摄于 1998 年");
-   - `"crop": [l, t, r, b]`: fractions 0–1 to crop candidate image (full-page screenshots usually need one).
+   - `"crop": [l, t, r, b]`: fractions 0–1 to crop candidate image, measured on the upright image (EXIF orientation applied, exactly as `sheet.py` shows it; full-page screenshots usually need one).
    - **Identity**: label a person only when ≥2 independent sources show the same face. Retrieval is not verification: `entity_match` in `SOURCE.json` (`identity.match` in `STATE.json`) only says how the *name* was resolved (`explicit` / `hint` / `unique` / `exact_label`). `family` is a provenance heuristic for shared hosting: Wikidata P18, Commons and Openverse-from-Wikimedia copies of one file share the `wikimedia` family and are never separate confirmations — but different families are not proof of independence either; judge the pages yourself.
    - Prefer period-appropriate images over modern ones; note modern images explicitly.
 
@@ -139,7 +144,7 @@ Fixed rules, not options: real images only (photos, scans, screenshots, web arch
    - `export.py` automatically builds the native intermediate (`WORKDIR/illustrated_intermediate.epub`), executes `verify.py` against the baseline (`original.epub` or `normalized.epub`), and only invokes Calibre after intermediate verification passes.
    - Downstream converted files (`.docx`, `.pdf`, `.mobi`, `.azw3`) undergo layout reflow and cannot be checked by `verify.py` or `epubcheck_diff.py`; conduct visual inspection and text/image checks.
 
-6. **Hand over** — give the user the output path, figure/gallery count, missing items and notes, and ask for feedback on a sample chapter before doing the whole book. Say that the book ends with an image-credits section (`settings.credits`, default on; `credits_title` renames it). For every inserted image it lists creator, licence and URL, credit text, source page and the changes made (JPEG re-encode, downscale, and crop only when one was applied), copied from `SOURCE.json`. Missing values read "unknown/未知". Point the user to `WORKDIR/配图清单.md`, which has the same information plus image URLs. This metadata is not verified, and a licence label is not permission. Rights clearance stays with the user, so never describe images as cleared. If the user turns credits off, tell them to keep `配图清单.md` with the book when sharing it.
+6. **Hand over** — give the user the output path, figure/gallery count, compression stats (preset used, inserted images count, candidate bytes → image bytes, targets unmet if any; full details in `WORKDIR/compression-report.json`), missing items and notes, and ask for feedback on a sample chapter before doing the whole book. Say that the book ends with an image-credits section (`settings.credits`, default on; `credits_title` renames it). For every inserted image it lists creator, licence and URL, credit text, source page and the changes made (JPEG re-encode with quality, original JPEG data retained/stripped, downscale, crop on upright coordinates, and transparency fill only when applied). Attribution comes from `SOURCE.json`; the exporter records the image transformations. Missing values read "unknown/未知". Point the user to `WORKDIR/配图清单.md`, which has the same information plus image URLs and compression stats. This metadata is not verified, and a licence label is not permission. Rights clearance stays with the user, so never describe images as cleared. If the user turns credits off, tell them to keep `配图清单.md` with the book when sharing it.
 
 ## Layout Notes
 
@@ -150,4 +155,4 @@ Fixed rules, not options: real images only (photos, scans, screenshots, web arch
   - Local images and stylesheets from the original package are copied beside the output.
   - Markdown preserves original block structures, code fences, and indentation without injecting arbitrary pagination.
 - **Encoding and offsets**: Files are read and written byte-exactly (`newline=""`), preserving CRLF/LF line endings and original character encodings.
-- **EPUB styling**: Styles are inline (no stylesheet edits) and XHTML 1.1 / EPUB 2 safe (`div`, `p`, `img`). Images are re-encoded as JPEG ≤1400px into `illus/` next to the OPF and registered in the manifest.
+- **EPUB styling**: Styles are inline (no stylesheet edits) and XHTML 1.1 / EPUB 2 safe (`div`, `p`, `img`). Images are compressed baseline JPEG (see `image_compression` settings; default `balanced` max 1024px, 80 quality, 120 KiB target) into `illus/` next to the OPF and registered in the manifest.

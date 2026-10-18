@@ -29,16 +29,20 @@ entities.json "settings" (agreed with the user; top-level keys of the same name 
                 crop, transparency fill), copied from SOURCE.json; missing values read "unknown".
                 Not a rights check. With false, keep 配图清单.md with the book when sharing it.
   credits_title: heading of that section (default "图片来源" / "Image credits")
+  image_compression: "compact" | "balanced" | "high"  (default "balanced"), or an object
+                {"preset": ..., "max_side", "quality", "target_kb", "min_quality", "min_side"} overriding
+                single values (target_kb null = no byte target). Only the inserted pictures are
+                compressed (see compress.py); per-image results go to WORKDIR/compression-report.json.
 per entity:
   pick:    "file" | ["file", ...]     chosen candidate(s) in candidates/<id>/ ; no pick -> skipped
   match:   ["text", ...]              strings whose first occurrence places the figure
   at:      "p00123"                   force the paragraph (overrides match)
   caption: "..."                      first caption line (default "name · role")
   note:    "..."                      second caption line, e.g. "摄于 1998 年" / "1997 年网页存档"
-  crop:    [l, t, r, b]               fractions 0–1 to crop the picked image
+  crop:    [l, t, r, b]               fractions 0–1 to crop the first picked image, measured on the
+                                      upright image (EXIF orientation applied, as sheet.py shows it)
 """
 import html
-import io
 import json
 import os
 import posixpath
@@ -50,9 +54,8 @@ import time
 import zipfile
 from urllib.parse import quote
 
-from PIL import Image
-
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import compress  # noqa: E402
 from native_util import (OUT_EXTS, book_format, choose_marker, decode, encode, inside,  # noqa: E402
                          marker_view, markers, member_of, safe_join, safe_name, sha256, url_to)
 
@@ -99,6 +102,16 @@ if fmt != "epub" and os.path.isdir(out):
 S = {**cfg, **cfg.get("settings", {})}
 if not S.get("inline", True) and not S.get("gallery", True):
     fail("settings: inline and gallery are both off — nothing to insert")
+try:
+    COMP = compress.resolve(S.get("image_compression"))
+except compress.ConfigError as ex:
+    fail(str(ex))
+report_path = os.path.join(work, "compression-report.json")
+if (os.path.realpath(report_path) in protected | {os.path.realpath(out)}
+        or any(inside(report_path, d) for d in (src, build, os.path.join(work, "candidates")))
+        or os.path.exists(report_path) and not os.path.isfile(report_path)):
+    fail(f"{report_path} points at the source, the output or a working/candidate file (or is not a regular "
+         "file); remove it and re-run")
 toc, paras = book["toc"], book["paras"]
 lo, hi = S.get("scope", [0, len(toc) - 1])
 exclude = set(S.get("exclude_toc", []))
@@ -148,43 +161,26 @@ for e in cfg["entities"]:
 placed.sort(key=lambda x: (x[0], x[1]))
 
 
-# 2. images (JPEG <= 1400 px), named after the entity id
+# 2. images (compressed JPEG, see compress.py), named after the entity id; each is written once and
+# shared by the inline figure, the gallery and the credits
 used_names = set()
-changes = {}  # output image name -> what was done to the picked file (for the credits)
+changes = {}  # output image name -> what was done to the picked file (credits + compression report)
 
 
 def prepare(e):
     picks = e["pick"] if isinstance(e["pick"], list) else [e["pick"]]
     out_imgs = []
     for n, f in enumerate(picks):
-        im = Image.open(os.path.join(work, "candidates", e["id"], f))
-        done = {"pick": f, "format": im.format, "flattened": im.mode in ("RGBA", "LA")
-                or (im.mode == "P" and "transparency" in im.info), "cropped": False}
-        if im.mode in ("RGBA", "LA", "P"):
-            im = im.convert("RGBA")
-            bg = Image.new("RGB", im.size, "white")
-            bg.paste(im, mask=im.split()[-1])
-            im = bg
-        im = im.convert("RGB")
-        if e.get("crop") and n == 0:
-            l, t, r, b = e["crop"]
-            w, h = im.size
-            box = (int(l * w), int(t * h), int(r * w), int(b * h))
-            done["cropped"] = box != (0, 0, w, h)
-            im = im.crop(box)
-        before = im.size
-        im.thumbnail((1400, 1400))
-        done["resized"] = im.size if im.size != before else None
+        data, done = compress.compress(os.path.join(work, "candidates", e["id"], f), COMP,
+                                       e.get("crop") if n == 0 else None)
         stem = safe_name(e["id"]) + ("" if n == 0 else f"_{n}")
         name, k = f"{stem}.jpg", 1
         while name.lower() in used_names:
             k += 1
             name = f"{stem}-{k}.jpg"
         used_names.add(name.lower())
-        changes[name] = done
-        buf = io.BytesIO()
-        im.save(buf, "JPEG", quality=85)
-        out_imgs.append((name, im.size, buf.getvalue()))
+        changes[name] = {"entity": e["id"], "pick": f, "image": name, **done}
+        out_imgs.append((name, (done["output"]["width"], done["output"]["height"]), data))
     return out_imgs
 
 
@@ -306,6 +302,8 @@ L = ({"title": "Image credits", "unknown": "unknown", "author": "Creator", "lice
       "credit": "Credit", "attribution": "Attribution", "copyright": "Copyright", "terms": "Usage terms",
       "source": "Source", "changes": "Changes", "local": "local file supplied by the user", "sep": "; ",
       "colon": ": ", "jpeg": "converted to JPEG", "rejpeg": "re-encoded as JPEG", "crop": "cropped",
+      "quality": " (quality {q})", "keep": "original JPEG data kept", "strip": "metadata removed",
+      "orient": "rotated upright (EXIF orientation)",
       "flat": "transparency filled with white", "resize": "downscaled to {w}×{h} px",
       "note": "From the metadata recorded by each image's source page or supplier; not independently "
               "verified and not a statement that use is permitted. “unknown” means nothing was recorded."}
@@ -313,7 +311,8 @@ L = ({"title": "Image credits", "unknown": "unknown", "author": "Creator", "lice
      {"title": "图片来源", "unknown": "未知", "author": "作者", "license": "许可", "credit": "图片署名",
       "attribution": "署名要求", "copyright": "版权", "terms": "使用条款", "source": "来源", "changes": "修改",
       "local": "用户提供的本地文件", "sep": "；", "colon": "：", "jpeg": "转换为 JPEG", "rejpeg": "重新编码为 JPEG",
-      "crop": "已裁剪", "flat": "透明部分填充为白色", "resize": "缩小至 {w}×{h} 像素",
+      "quality": "（质量 {q}）", "keep": "保留原 JPEG 图像数据", "strip": "已移除元数据",
+      "orient": "按 EXIF 方向转正", "crop": "已裁剪", "flat": "透明部分填充为白色", "resize": "缩小至 {w}×{h} 像素",
       "note": "以下信息取自各图片来源页面或提供者记录的元数据，未经独立核实，也不表示已获得使用许可；"
               "“未知”表示没有记录到该项。"})
 LOCAL_SOURCES = {"reuse"}
@@ -362,7 +361,12 @@ def credit_source(prov):
 
 def credit_changes(name):
     c = changes[name]
-    out = [L["rejpeg"] if c["format"] == "JPEG" else L["jpeg"]]
+    if c["kept_original_jpeg"]:
+        out = [L["keep"]] + ([L["strip"]] if c["output"]["bytes"] != c["original"]["bytes"] else [])
+    else:
+        out = [(L["rejpeg"] if c["original"]["format"] == "JPEG" else L["jpeg"]) + L["quality"].format(q=c["quality"])]
+    if c["oriented"]:
+        out.append(L["orient"])
     if c["cropped"]:
         out.append(L["crop"])
     if c["flattened"]:
@@ -562,6 +566,10 @@ else:
             conflicts.append(p)
     conflicts += [p for p in (os.path.join(out_dir, assets, n) for n, _, _ in all_images)
                   if os.path.realpath(p) in protected]
+    written = {os.path.realpath(p) for p in plan} | {os.path.realpath(os.path.join(out_dir, assets, n))
+                                                    for n, _, _ in all_images}
+    if os.path.realpath(report_path) in written:
+        conflicts.append(report_path + " (compression report)")
     if conflicts:
         fail("these files already exist beside the output with different content (choose another output "
              f"directory): {conflicts[:5]}")
@@ -592,7 +600,37 @@ else:
         f.write(doc)
     os.replace(tmp, out)
 
-# 7. review list: what went where, from which source, and what is still missing
+# 7. compression report: only the inserted pictures were compressed; source-book files are untouched
+def kib(n):
+    return f"{n / 1048576:.1f} MiB" if n >= 1048576 else f"{n / 1024:.0f} KiB"
+
+
+rows = [changes[n] for n, _, _ in all_images]
+totals = {"images": len(rows), "candidate_bytes": sum(r["original"]["bytes"] for r in rows),
+          "image_bytes": sum(r["output"]["bytes"] for r in rows),
+          "kept_original_jpeg": sum(1 for r in rows if r["kept_original_jpeg"]),
+          "targets_unmet": sum(1 for r in rows if r["target_met"] is False),
+          "output_bytes": os.path.getsize(out)}
+settings_used = {k: COMP[k] for k in compress.FIELDS}
+report = {"version": 1, "preset": COMP["preset"], "overrides": COMP["overrides"], "settings": settings_used,
+          "out": out, "totals": totals, "images": rows,
+          "notes": ["candidate_bytes/image_bytes cover only the pictures inserted by inject.py; images, text, "
+                    "markup and styles of the source book are copied unchanged.",
+                    "output_bytes is the size of the written output file (for EPUB the whole book).",
+                    "target_kb is best effort: target_met false means quality and size floors were reached first."]}
+fd, tmp = tempfile.mkstemp(suffix=".json", dir=work)
+with os.fdopen(fd, "w", encoding="utf-8") as f:
+    json.dump(report, f, ensure_ascii=False, indent=1)
+os.replace(tmp, report_path)  # replaces the path itself, never writes through a link
+target_txt = f"{COMP['target_kb']:g} KiB" if COMP["target_kb"] is not None else None
+comp_line = (f"图片压缩（{COMP['preset']}{'，自定义' if COMP['overrides'] else ''}）：{totals['images']} 张新插图，"
+             f"所选原图共 {kib(totals['candidate_bytes'])} → 写入 {kib(totals['image_bytes'])}"
+             + (f"；每张目标 ≤ {target_txt}（尽力而为）" if target_txt else "")
+             + (f"，{totals['targets_unmet']} 张已到质量/尺寸下限仍未达到" if totals["targets_unmet"] else "")
+             + "。原书自带的图片、文字和样式未改动；明细见 compression-report.json。")
+
+
+# 8. review list: what went where, from which source, and what is still missing
 def cell_md(s):
     return " ".join(str(s).split()).replace("|", "\\|")
 
@@ -601,6 +639,7 @@ def cell_md(s):
 lines = [f"# 配图清单 · {cfg.get('book', '')}", "",
          "许可与署名信息取自来源页面或提供者记录的元数据，未经独立核实，不代表已获得使用许可；“未知”表示未记录。"
          + ("" if S.get("credits", True) else " 本书未内嵌图片来源页（credits: false），分享时请附上本清单。"), "",
+         comp_line, "",
          "| 位置 | 段落开头 | 对象 | 图注 | 来源 | 作者 | 许可 | 署名/版权/条款 | 修改 |",
          "|---|---|---|---|---|---|---|---|---|"]
 for i, _, e in placed:
@@ -624,6 +663,8 @@ print(json.dumps({"format": fmt, "figures": sum(1 for x in inserts if x[3] == "f
                   "galleries": sum(1 for x in inserts if x[3] == "gallery"),
                   "credits": any(x[3] == "credits" for x in inserts), "out": out,
                   "assets": assets_dir if fmt != "epub" else None,
-                  "resources_copied": copied, "marker": marker}, ensure_ascii=False))
+                  "resources_copied": copied, "marker": marker,
+                  "compression": {"preset": COMP["preset"], "custom": bool(COMP["overrides"]), **totals,
+                                  "report": report_path}}, ensure_ascii=False))
 for i, _, e in placed:
     print(f"  {paras[i]['pid']} {e['id']}")

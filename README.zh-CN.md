@@ -151,6 +151,32 @@ python3 -m venv ~/.venvs/book-illustrator
 
 原生 HTML 与 Markdown 输出会附带一个 `<文件名>_assets/` 图片目录。
 
+## 图片压缩
+
+插入的图片会自动压缩为标准基线 JPEG（按 EXIF 自动转正、透明背景填充为白色、剔除冗余元数据；符合条件的 JPEG 会保留原图像数据，避免重复压缩）。默认使用 `balanced` 预设。
+
+| 预设 | 最大边长 | 单图目标体积 | 适用场景 |
+|---|---|---|---|
+| `compact` | 800 px | 80 KiB | 优先省空间，适合手机或电纸书阅读 |
+| `balanced`（默认） | 1024 px | 120 KiB | 兼顾画质与体积 |
+| `high` | 1600 px | 300 KiB | 画质优先，文件可能比默认或旧版更大 |
+
+直接告诉 Agent：*“按省空间模式重新导出，不重新找图。”* 也可以在 `entities.json` 现有的 `settings` 中加入：
+
+```json
+{"image_compression": "compact"}
+```
+
+或使用自定义覆盖：
+
+```json
+{"image_compression": {"preset": "balanced", "target_kb": 150, "max_side": 1200}}
+```
+
+- **单图尽力而为**：目标体积是单张图片的预算目标，受质量与尺寸下限保护，不做全书总容量的硬性封顶承诺；下载的候选原图完整保留在 `candidates/` 目录。
+- **转换格式说明**：对于经 Calibre 转出的格式（DOCX、AZW3、MOBI、PDF），`compression-report.json` 记录的是原生中间体 EPUB 的大小，Calibre 最终导出的文件体积可能会有所不同。
+导出后，`配图清单.md` 显示压缩前后的图片大小，`compression-report.json` 记录逐图尺寸、质量和是否达到目标。
+
 ## 工作流程
 
 1. `prepare.py` 解包（或转换）书籍，为每个段落建立索引。

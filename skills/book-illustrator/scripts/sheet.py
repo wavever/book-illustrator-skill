@@ -4,7 +4,8 @@ Usage: python3 sheet.py WORKDIR [entity_id ...] [--cols N] [--rows N]
 Writes WORKDIR/sheets/sheet_NN.jpg and sheets/index.json (page -> entity -> files). Every
 candidate is shown: an entity with more than --cols images (default 6) continues on further rows
 and pages. Each cell is labeled with the exact file name to use as "pick", its size and source;
-the current pick is outlined in green. Old sheet_*.jpg pages are removed first, so no stale page
+the current pick is outlined in green. Images are shown upright (EXIF orientation applied), the
+frame that "crop" fractions refer to. Old sheet_*.jpg pages are removed first, so no stale page
 survives. Fonts: $BOOK_ILLUSTRATOR_FONT (or the older $EPUB_ILLUSTRATE_FONT), then common system
 CJK fonts, then Pillow's built-in font.
 """
@@ -13,7 +14,7 @@ import json
 import os
 import sys
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 IMG_EXT = (".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tif", ".tiff")
 CJK_FONTS = [
@@ -133,7 +134,8 @@ def main(argv=None):
                 x, top = c * CELL, y + HEAD
                 size = "unreadable"
                 try:
-                    with Image.open(os.path.join(work, "candidates", eid, f)) as im:
+                    with Image.open(os.path.join(work, "candidates", eid, f)) as raw:
+                        im = ImageOps.exif_transpose(raw)  # upright, as inject.py sees it (crop coordinates)
                         size = f"{im.width}x{im.height}"
                         im.thumbnail((CELL - 8, CELL - 8))
                         th = im.convert("RGB")

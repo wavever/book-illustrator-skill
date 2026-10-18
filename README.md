@@ -151,6 +151,32 @@ No browser, login or API key is needed for the default image search. If your age
 
 Native HTML and Markdown output comes with a `<name>_assets/` folder holding the images.
 
+## Image compression
+
+Inserted images are automatically compressed as baseline JPEG (EXIF orientation applied, transparency filled with white, metadata stripped, and original JPEG data retained where suitable to avoid unnecessary re-encoding). The default preset is `balanced`.
+
+| Preset | Max side | Target size / image | Use |
+|---|---|---|---|
+| `compact` | 800 px | 80 KiB | Smaller files for phones and e-readers |
+| `balanced` (default) | 1024 px | 120 KiB | Balance quality and file size |
+| `high` | 1600 px | 300 KiB | Quality first; may be larger than default or older versions |
+
+Tell your agent: *"Re-export with compact image compression; reuse the downloaded pictures."* Or add this to the existing `settings` object in `entities.json`:
+
+```json
+{"image_compression": "compact"}
+```
+
+Or with custom overrides:
+
+```json
+{"image_compression": {"preset": "balanced", "target_kb": 150, "max_side": 1200}}
+```
+
+- **Per-image best effort**: Byte targets are per-image targets bounded by quality and dimension floors; there is no hard per-book size cap. Downloaded original candidates in `candidates/` are preserved untouched.
+- **Converted formats**: For Calibre export formats (DOCX, AZW3, MOBI, PDF), `compression-report.json` describes the native intermediate EPUB size; the final converter output size can differ.
+After export, `配图清单.md` shows before/after image sizes. `compression-report.json` records each image’s dimensions, quality and whether it met its target.
+
 ## How it works
 
 1. `prepare.py` unpacks (or converts) the book and indexes every paragraph.
